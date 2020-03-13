@@ -1,0 +1,69 @@
+Lines: 593 - 658, SafeInt.hpp source.
+
+/*
+* Error handler classes
+* Using classes to deal with exceptions is going to allow the most
+* flexibility, and we can mix different error handlers in the same project
+* or even the same file. It isn't advisable to do this in the same function
+* because a SafeInt< int, MyExceptionHandler > isn't the same thing as
+* SafeInt< int, YourExceptionHander >.
+* If for some reason you have to translate between the two, cast one of them back to its
+* native type.
+*
+* To use your own exception class with SafeInt, first create your exception class,
+* which may look something like the SafeIntException class below. The second step is to
+* create a template specialization that implements SafeIntOnOverflow and SafeIntOnDivZero.
+* For example:
+*
+* template <> class SafeIntExceptionHandler < YourExceptionClass >
+* {
+*     static __declspec(noreturn) void __stdcall SafeIntOnOverflow()
+*     {
+*         throw YourExceptionClass( EXCEPTION_INT_OVERFLOW );
+*     }
+*
+*     static __declspec(noreturn) void __stdcall SafeIntOnDivZero()
+*     {
+*         throw YourExceptionClass( EXCEPTION_INT_DIVIDE_BY_ZERO );
+*     }
+* };
+*
+* typedef SafeIntExceptionHandler < YourExceptionClass > YourSafeIntExceptionHandler
+* You'd then declare your SafeInt objects like this:
+* SafeInt< int, YourSafeIntExceptionHandler >
+*
+* Unfortunately, there is no such thing as partial template specialization in typedef
+* statements, so you have three options if you find this cumbersome:
+*
+* 1) Create a holder class:
+*
+* template < typename T >
+* class MySafeInt
+* {
+*   public:
+*   SafeInt< T, MyExceptionClass> si;
+* };
+*
+* You'd then declare an instance like so:
+* MySafeInt< int > i;
+*
+* You'd lose handy things like initialization - it would have to be initialized as:
+*
+* i.si = 0;
+*
+* 2) You could create a typedef for every int type you deal with:
+*
+* typedef SafeInt< int, MyExceptionClass > MySafeInt;
+* typedef SafeInt< char, MyExceptionClass > MySafeChar;
+*
+* and so on. The second approach is probably more usable, and will just drop into code
+* better, which is the original intent of the SafeInt class.
+*
+* 3) If you're going to consistently use a different class to handle your exceptions,
+*    you can override the default typedef like so:
+*
+*    #define SafeIntDefaultExceptionHandler YourSafeIntExceptionHandler
+*
+*    Overall, this is probably the best approach.
+* */
+
