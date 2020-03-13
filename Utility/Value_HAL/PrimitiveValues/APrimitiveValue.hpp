@@ -8,51 +8,47 @@
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SAlias
+namespace NotationEngine::Utility::Value
 {
-	using std::string;
-}
-
-SMeta
-{
-	template<typename Type>
-	constant sfn IsPrimitiveType() -> bool
+	inline namespace Alias
 	{
-		return IsInt<Type>() || IsFloat<Type>() || IsBoostInt<Type>() || IsBoostFloat<Type>();
+		using std::string;
+	}
+
+	inline namespace Meta
+	{
+		template<typename Type>
+		constexpr bool IsPrimitiveType()
+		{
+			return IsInt<Type>() || IsFloat<Type>() || IsBoostInt<Type>() || IsBoostFloat<Type>();
+		}
+	}
+
+	inline namespace Source
+	{
+		template<typename PV_Type>
+		class APrimitiveValue : public AValue_HAL
+		{
+			static_assert(IsPrimitiveType<PV_Type>(), "APrimitiveValue requires a primitive type to properly use this interface.");
+
+		public:
+			virtual ~APrimitiveValue(void) {};
+
+			virtual const Sign     GetSign (void) const = NULL;
+			virtual const PV_Type& GetValue(void) const = NULL;
+
+			virtual const TypeData& GetTypeID(void) const = NULL;
+
+			virtual void Reinitialize(void) = NULL;
+			
+			virtual const string Str(void) const = NULL;
+
+			virtual void SetZero(void) -> void = NULL;
+
+			virtual void SetValue(const uInt64            ValueToSet) = NULL;
+			virtual void SetValue(const AValue_HAL* const ValueToSet) = NULL;
+
+			virtual void SetValue(const PV_Type& ValueToSet) = NULL;
+		};
 	}
 }
-
-SSource
-{
-	template<typename PV_Type>
-	class APrimitiveValue : public AValue_HAL
-	{
-		M_constraint(IsPrimitiveType<PV_Type>(), "APrimitiveValue requires a primitive type to properly use this interface.");
-
-	public:
-		virtual ~APrimitiveValue(void) {};
-
-		implem  sfn GetSign (void) ro -> ro     Sign     = NULL;
-		virtual sfn GetValue(void) ro -> ro Ref(PV_Type) = NULL;
-
-		implem sfn GetTypeID(void) ro -> ro Ref(TypeData) = NULL;
-
-		implem sfn Reinitialize(void) -> void = NULL;
-		
-		implem sfn Str(void) ro -> ro string = NULL;
-
-		implem sfn SetZero(void) -> void = NULL;
-
-		implem sfn SetValue(ro        uInt64      ValueToSet) -> void = NULL;
-		//implem sfn SetValue(ro        sInt64      ValueToSet) -> void = NULL;
-		//implem sfn SetValue(ro        float32     ValueToSet) -> void = NULL;
-		//implem sfn SetValue(ro        float64     ValueToSet) -> void = NULL;
-		implem sfn SetValue(ro ptr<ro AValue_HAL> ValueToSet) -> void = NULL;
-
-		virtual sfn SetValue(ro Ref(PV_Type) ValueToSet) -> void = NULL;
-	};
-}
-
-Context_End

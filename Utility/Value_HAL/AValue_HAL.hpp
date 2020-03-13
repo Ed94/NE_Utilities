@@ -32,63 +32,59 @@ Note: Do not use PVN_HAL for non-testing. A proper native template class should 
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SSource
+namespace NotationEngine::Utility::Value
 {
+	inline namespace Source
+	{
+	}
 }
 
-Context_End
 
 
 // Sector: Flexible AValue_Hal
 #ifdef __FLEX_VHAL__
 
-	Context(NotationEngine::Utility::Value)
-
-	SAlias
+	namespace NotationEngine::Utility::Value
 	{
-		using std::string;
-
-		using NE_M::Value;
-
-		using NE_U  ::Sign    ;
-		using NE_U_R::TypeData;
-
-		using NE_U::uInt64;
-		using NE_U::sInt64;
-		using NE_U::float64;
-		using NE_U::float32;
-	}
-
-	SMeta
-	{
-	}
-
-	SSource
-	{
-		class AValue_HAL : public Value
+		inline namespace Alias
 		{
-		public:
-			~AValue_HAL(void) {};
+			using std::string;
 
-			virtual sfn GetSign  (void) ro -> ro     Sign      = NULL;
-			implem  sfn GetTypeID(void) ro -> ro Ref(TypeData) = NULL;
+			using NE_M::Value;
 
-			implem sfn Reinitialize(void) -> void = NULL;
+			using NE_U  ::Sign    ;
+			using NE_U_R::TypeData;
 
-			implem sfn Str(void) ro -> ro string = NULL;
+			using NE_U::uInt64;
+			using NE_U::sInt64;
+			using NE_U::float64;
+			using NE_U::float32;
+		}
 
-			virtual sfn SetZero(void) -> void = NULL;
+		inline namespace Meta
+		{
+		}
 
-			virtual sfn SetValue(ro        uInt64      ValueToSet) -> void = NULL;
-			//virtual sfn SetValue(ro        sInt64      ValueToSet) -> void = NULL;
-			//virtual sfn SetValue(ro        float32     ValueToSet) -> void = NULL;
-			//virtual sfn SetValue(ro        float64     ValueToSet) -> void = NULL;
-			virtual sfn SetValue(ro ptr<ro AValue_HAL> ValueToSet) -> void = NULL;
-		};
+		inline namespace Source
+		{
+			class AValue_HAL : public Value
+			{
+			public:
+				~AValue_HAL(void) {};
+
+				virtual const Sign      GetSign  (void) ro = NULL;
+				virtual const TypeData* GetTypeID(void) ro = NULL;
+
+				virtual void Reinitialize(void)= NULL;
+
+				virtual const string Str(void) const = NULL;
+
+				virtual void SetZero(void) = NULL;
+
+				virtual void SetValue(const uInt64            ValueToSet) = NULL;
+				virtual void SetValue(const AValue_HAL* const ValueToSet) = NULL;
+			};
+		}
 	}
-
-	Context_End
 
 #endif

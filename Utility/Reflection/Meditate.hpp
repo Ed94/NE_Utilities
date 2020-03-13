@@ -16,67 +16,64 @@ A meta-reflection library.
 #include <type_traits>
 
 // Notation Engine
-#include "Context_Util.hpp"
-
 #include "Dev/DevMeta.hpp"
 
 
 
-Context(NotationEngine::Utility::Reflection)
-
-SAlias
+namespace NotationEngine::Utility::Reflection
 {
-	template<typename Type>
-	using RemoveCV = std::remove_cv_t<Type>;
-
-	template<typename Type>
-	using RemoveRef = std::remove_reference_t<Type>;
-
-	template<typename Type>
-	using RawType = RemoveCV< RemoveRef<Type> >;
-
-	template<typename Type, typename TypeRef>
-	using SameTypeCV = std::is_same<Type, TypeRef>;
-
-	template<typename Type, typename  TypeRef>
-	using SameType = SameTypeCV< RawType<Type>, RawType<Type> >;
-
-	template<typename Base, typename Derived>
-	using OfClass = std::is_base_of<Base, Derived>;
-
-	using TypeData = std::type_info;
-
-	template<bool Constraint>
-	using Should = typename std::enable_if<Constraint>::type;
-
-	template<bool Constraint, typename ReturnType>
-	using Where = typename std::enable_if<Constraint, ReturnType>::type;
-}
-
-SMeta
-{
-	inline ro Ref(TypeData) TypeData_TypeID = typeid(TypeData);
-}
-
-SSource
-{
-	template<typename Base, typename Derived>
-	constant sfn IsOfClass(void) -> bool
+	inline namespace Alias
 	{
-		return OfClass<Base, Derived>::value;
+		template<typename Type>
+		using RemoveCV = std::remove_cv_t<Type>;
+
+		template<typename Type>
+		using RemoveRef = std::remove_reference_t<Type>;
+
+		template<typename Type>
+		using RawType = RemoveCV< RemoveRef<Type> >;
+
+		template<typename Type, typename TypeRef>
+		using SameTypeCV = std::is_same<Type, TypeRef>;
+
+		template<typename Type, typename  TypeRef>
+		using SameType = SameTypeCV< RawType<Type>, RawType<Type> >;
+
+		template<typename Base, typename Derived>
+		using OfClass = std::is_base_of<Base, Derived>;
+
+		using TypeData = std::type_info;
+
+		template<bool Constraint>
+		using Should = typename std::enable_if<Constraint>::type;
+
+		template<bool Constraint, typename ReturnType>
+		using Where = typename std::enable_if<Constraint, ReturnType>::type;
 	}
 
-	template<typename Type, typename TypeRef>
-	constant sfn IsSameType(void) -> bool
+	inline namespace Meta
 	{
-		return SameType<Type, TypeRef>::value;
+		inline const TypeData& TypeData_TypeID = typeid(TypeData);
 	}
 
-	template<typename Type, typename TypeRef>
-	constant sfn IsSameTypeCV(void) -> bool
+	inline namespace Source
 	{
-		return SameTypeCV<Type, TypeRef>::value;
+		template<typename Base, typename Derived>
+		constexpr bool IsOfClass(void)
+		{
+			return OfClass<Base, Derived>::value;
+		}
+
+		template<typename Type, typename TypeRef>
+		constexpr bool IsSameType(void)
+		{
+			return SameType<Type, TypeRef>::value;
+		}
+
+		template<typename Type, typename TypeRef>
+		constexpr bool IsSameTypeCV(void)
+		{
+			return SameTypeCV<Type, TypeRef>::value;
+		}
 	}
 }
-
-Context_End

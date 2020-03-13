@@ -19,26 +19,25 @@ Defines the object manager abstract interface.
 
 
 
-Context(NotationEngine::Utility::SmartMemory)
-
-SAlias
+namespace NotationEngine::Utility::SmartMemory
 {
-	// C++ STL
-	using std::string;
-
-	// Notation Engine
-	using NE_M::Object;
-}
-
-SSource
-{
-	class AObjectManager
+	inline namespace Alias
 	{
-	public:
-		virtual ~AObjectManager(void) = NULL;	
+		// C++ STL
+		using std::string;
 
-		//virtual sfn Str(void) ro -> string = NULL;
-	};
+		// Notation Engine
+		using NE_M::Object;
+	}
+
+	inline namespace Source
+	{
+		class AObjectManager
+		{
+		public:
+			virtual ~AObjectManager(void) = NULL;	
+
+			//virtual sfn Str(void) ro -> string = NULL;
+		};
+	}
 }
-
-Context_End

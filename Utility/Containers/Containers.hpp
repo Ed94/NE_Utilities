@@ -20,15 +20,14 @@ Contains a library of functionality and definitions related to either custom or 
 
 
 
-Context(NotationEngine::Utility::Containers)
-
-SAlias
+namespace NotationEngine::Utility::Containers
 {
-	template<typename Left, typename Right>
-	sfn MakePair(rRef(Left) _left, rRef(Right) _right) -> deduce
+	inline namespace Alias
 	{
-		return std::make_pair<Left, Right>(_left, _right);
+		template<typename Left, typename Right>
+		auto MakePair(Left&& _left, Right&& _right)
+		{
+			return std::make_pair<Left, Right>(_left, _right);
+		}
 	}
 }
-
-Context_End

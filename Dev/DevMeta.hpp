@@ -15,36 +15,36 @@ All the meta implementation used for Notation Engine development.
 // C++
 #include "STL/STL_Compendium.hpp"
 
-// Trial By Fire
-#include "TrialByFire/C_Assist.h"
-#include "TrialByFire/Cpp_Assist.hpp"
+// Trial By Fire (Non-Standard)
+//#include "TrialByFire/C_Assist.h"
+//#include "TrialByFire/Cpp_Assist.hpp"
 
 
 
 // Macros
 
 
-// Sectors
+// Sectors (Only used in Non-Standard)
 
 //Provides a M.A.S. like sector space in C++.
-#define Context(_context) \
+//#define Context(_context) \
 namespace _context        \
-{
+//{
 
 // Provides an explicit end to a context sector.
-#define Context_End \
-}
+//#define Context_End \
+//}
 
 // Provides a M.A.S. like alias sector in C++. Aliases are transparent to the context namespace.
-#define SAlias \
+//#define SAlias \
 filter Alias
 
 // Provides a sector for specifying meta-data for reflection.
-#define SMeta \
+//#define SMeta \
 filter Meta
 
 // Used to version implementation of a M.A.S. like SSource sector namespace.
-#define SSource \
+//#define SSource \
 filter Source
 
 

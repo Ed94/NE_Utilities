@@ -15,40 +15,38 @@ Description:
 #include <memory>
 
 // Notation Engine
-#include "Context/Context_Util.hpp"
-
 #include "Dev/DevMeta.hpp"
 
 
 
-Context(NotationEngine::Utility::SmartMemory)
-
-SAlias
+namespace NotationEngine::Utility::SmartMemory
 {
-	using DataSize   = std::size_t   ;   //Used to store the size of a data block.
-    using IntAddress = std::uintptr_t;   //Used to store the integer address of a pointer.
+	inline namespace Alias
+	{
+		using DataSize   = std::size_t   ;   //Used to store the size of a data block.
+		using IntAddress = std::uintptr_t;   //Used to store the integer address of a pointer.
 
-	GUsing(SPtr       ) = std::shared_ptr             <Type>;
-	GUsing(SPtrForThis) = std::enable_shared_from_this<Type>;
-	GUsing(UPtr       ) = std::unique_ptr             <Type>;
-	GUsing(WPtr       ) = std::weak_ptr               <Type>;
+		template<typename Type> using SPtr        = std::shared_ptr             <Type>;
+		template<typename Type> using SPtrForThis = std::enable_shared_from_this<Type>;
+		template<typename Type> using UPtr        = std::unique_ptr             <Type>;
+		template<typename Type> using WPtr        = std::weak_ptr               <Type>;
 
-	template<typename Type>
-	sfn MkSPtr() -> SPtr<Type>;
+		template<typename Type>
+		SPtr<Type> MkSPtr();
 
-	template<typename Type>
-	sfn MkUPtr() -> UPtr<Type>;
+		template<typename Type>
+		UPtr<Type> MkUPtr();
+	}
+
+	inline namespace Meta
+	{
+	}
+
+	inline namespace Source
+	{
+	}
 }
 
-SSource
-{
-}
-
-SAlias
-{
-}
-
-Context_End
 
 
 //Template Implementation

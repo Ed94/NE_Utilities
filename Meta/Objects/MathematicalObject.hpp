@@ -21,25 +21,24 @@ Defines a mathematical object.
 
 
 
-Context(NotationEngine::Meta)
-
-SSource
+namespace NotationEngine::Meta
 {
-	/*
-	An object that is formally defined.
-
-	Compatible with deductive reasoning and mathematical proofs.
-	*/
-	class MathematicalObject : public AbstractObject
+	inline namespace Source
 	{
-	public:
-		virtual ~MathematicalObject() = NULL;
+		/*
+		An object that is formally defined.
 
-		implem  sfn GetTypeID   (void) ro -> ro Ref(   TypeData) = NULL;
-		virtual sfn GetValue    (void) ro -> ro ptr<ro Value   > = NULL;
-		implem  sfn Reinitialize(void)    ->           void      = NULL;
-		implem  sfn Str         (void) ro -> ro        string    = NULL;
-	};
+		Compatible with deductive reasoning and mathematical proofs.
+		*/
+		class MathematicalObject : public AbstractObject
+		{
+		public:
+			virtual ~MathematicalObject() = NULL;
+
+			virtual  const TypeData&       GetTypeID   (void) const = NULL;
+			virtual  const Value*    const GetValue    (void) const = NULL;
+			virtual        void            Reinitialize(void)       = NULL;
+			virtual  const string          Str         (void) const = NULL;
+		};
+	}
 }
-
-Context_End

@@ -13,17 +13,16 @@ Implements the AbstractObject type.
 
 
 
-Context(NotationEngine::Meta)
-
-SMeta
+namespace NotationEngine::Meta
 {
-	data<ro Ref(TypeData) > AbstractObject_TypeID = typeid(AbstractObject);
-}
+	inline namespace Meta
+	{
+		const TypeData& AbstractObject_TypeID = typeid(AbstractObject);
+	}
 
-SSource
-{
-	AbstractObject::~AbstractObject(void)
-	{}
+	inline namespace Source
+	{
+		AbstractObject::~AbstractObject(void)
+		{}
+	}
 }
-
-Context_End

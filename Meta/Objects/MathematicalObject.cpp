@@ -12,17 +12,16 @@ Description: Contains implementation for mathematical object.
 
 
 
-Context(NotationEngine::Meta)
-
-SMeta
+namespace NotationEngine::Meta
 {
-	ro Ref(TypeData) MathematicalObject_TypeID = typeid(MathematicalObject);
-}
+	inline namespace Meta
+	{
+		const TypeData& MathematicalObject_TypeID = typeid(MathematicalObject);
+	}
 
-SSource
-{
-	MathematicalObject::~MathematicalObject(void)
-	{}
+	inline namespace Source
+	{
+		MathematicalObject::~MathematicalObject(void)
+		{}
+	}
 }
-
-Context_End

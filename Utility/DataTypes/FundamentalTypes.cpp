@@ -21,164 +21,163 @@ Contains any non-header implementation for the fundamental types.
 
 
 
-Context(NotationEngine::Utility)
-
-SSource
+namespace NotationEngine::Utility
 {
-	filter Float
+	inline namespace Source
 	{
-		sfn ApproxEqual(ro float32 _first, ro float32 _second) -> bool
+		inline namespace Float
 		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
-
-			ro float32 firstAbs  = abs(_first          ),
-					   secondAbs = abs(_second         ),
-					   diffAbs   = abs(_first - _second) ;
-
-			bool ExactlyEqual, 
-				 CloseToZero  ;
-
-			ExactlyEqual = (_first == _second                                        );
-			CloseToZero  = (_first == 0       || _second == 0 || diffAbs < Float32Min);
-
-			if (ExactlyEqual)  //Handles infinites
+			bool ApproxEqual(const float32 _first, const float32 _second)
 			{
-				return true;
-			}
-			else if (CloseToZero)   //Close to zero
-			{
-				return (diffAbs < (Float32Precision * Float32Min));
-			}
-			else                    //Relative Error
-			{
-				return (diffAbs / min(firstAbs + secondAbs, Float32Max) < Float32Precision);
-			}
-		}
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
 
-		sfn ApproxGreater(ro float32 _first, ro float32 _second) -> bool
-		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
+				const float32 firstAbs  = abs(_first          ),
+						      secondAbs = abs(_second         ),
+						      diffAbs   = abs(_first - _second) ;
 
-			stack<ro float32> firstAbs  = abs(_first )        ,
+				bool ExactlyEqual, 
+					 CloseToZero  ;
+
+				ExactlyEqual = (_first == _second                                        );
+				CloseToZero  = (_first == 0       || _second == 0 || diffAbs < Float32Min);
+
+				if (ExactlyEqual)  //Handles infinites
+				{
+					return true;
+				}
+				else if (CloseToZero)   //Close to zero
+				{
+					return (diffAbs < (Float32Precision * Float32Min));
+				}
+				else                    //Relative Error
+				{
+					return (diffAbs / min(firstAbs + secondAbs, Float32Max) < Float32Precision);
+				}
+			}
+
+			bool ApproxGreater(const float32 _first, const float32 _second)
+			{
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
+
+				const float32 firstAbs  = abs(_first )        ,
 							  secondAbs = abs(_second)        ,
 							  diff      = firstAbs - secondAbs ;
 
-			stack<bool> ExactlyEqual,
-						CloseToZero  ;
+				bool ExactlyEqual,
+					 CloseToZero  ;
 
-			ExactlyEqual = (_first == _second                                          ),
-			CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float32Min) ;
+				ExactlyEqual = (_first == _second                                          ),
+				CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float32Min) ;
 
-			if (CloseToZero)   //Close to zero
-			{
-				return (diff > (Float32Precision * Float32Min)) && !signbit(diff);
+				if (CloseToZero)   //Close to zero
+				{
+					return (diff > (Float32Precision * Float32Min)) && !signbit(diff);
+				}
+				else               //Relative Error
+				{
+					return (diff / min(firstAbs + secondAbs, Float32Max) > Float32Precision) && !signbit(diff);
+				}
 			}
-			else               //Relative Error
+
+			bool ApproxLess(const float32 _first, const float32 _second)
 			{
-				return (diff / min(firstAbs + secondAbs, Float32Max) > Float32Precision) && !signbit(diff);
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
+
+				stack<ro float32> firstAbs  = abs(_first )        ,
+								  secondAbs = abs(_second)        ,
+								  diff      = firstAbs - secondAbs ;
+
+				stack<bool> ExactlyEqual,
+							CloseToZero  ;
+
+				ExactlyEqual = (_first == _second                                          );
+				CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float32Min);
+
+				if (CloseToZero)   //Close to zero
+				{
+					return (diff > (Float32Precision * Float32Min)) && signbit(diff);
+				}
+				else               //Relative Error
+				{
+					return (diff / min(firstAbs + secondAbs, Float32Max) > Float32Precision) && signbit(diff);
+				}
 			}
-		}
 
-		sfn ApproxLess(ro float32 _first, ro float32 _second) -> bool
-		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/
-
-			stack<ro float32> firstAbs  = abs(_first )        ,
-							  secondAbs = abs(_second)        ,
-							  diff      = firstAbs - secondAbs ;
-
-			stack<bool> ExactlyEqual,
-						CloseToZero  ;
-
-			ExactlyEqual = (_first == _second                                          );
-			CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float32Min);
-
-			if (CloseToZero)   //Close to zero
+			bool ApproxEqual(const float64 _first, const float64 _second)
 			{
-				return (diff > (Float32Precision * Float32Min)) && signbit(diff);
-			}
-			else               //Relative Error
-			{
-				return (diff / min(firstAbs + secondAbs, Float32Max) > Float32Precision) && signbit(diff);
-			}
-		}
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 
-		sfn ApproxEqual(ro float64 _first, ro float64 _second) -> bool
-		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-
-			stack<ro float64> firstAbs  = abs(_first          ),
+				const float64 firstAbs  = abs(_first          ),
 							  secondAbs = abs(_second         ),
 							  diffAbs   = abs(_first - _second) ;
 
-			stack<bool> ExactlyEqual,
-						CloseToZero  ;
+				bool ExactlyEqual,
+					 CloseToZero  ;
 
-			ExactlyEqual = (_first == _second                                        );
-			CloseToZero  = (_first == 0       || _second == 0 || diffAbs < Float64Min);
+				ExactlyEqual = (_first == _second                                        );
+				CloseToZero  = (_first == 0       || _second == 0 || diffAbs < Float64Min);
 
-			if (ExactlyEqual)  //Handles infinites
-			{
-				return true;
+				if (ExactlyEqual)  //Handles infinites
+				{
+					return true;
+				}
+				else if (CloseToZero)   //Close to zero
+				{
+					return (diffAbs < (Float64Precision * Float64Min));
+				}
+				else                    //Relative Error
+				{
+					return (diffAbs / min(firstAbs + secondAbs, Float64Max) < Float64Precision);
+				}
 			}
-			else if (CloseToZero)   //Close to zero
-			{
-				return (diffAbs < (Float64Precision * Float64Min));
-			}
-			else                    //Relative Error
-			{
-				return (diffAbs / min(firstAbs + secondAbs, Float64Max) < Float64Precision);
-			}
-		}
 
-		sfn ApproxGreater(ro float64 _first, ro float64 _second) -> bool
-		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+			bool ApproxGreater(cosnt float64 _first, const float64 _second)
+			{
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 
-			stack<ro float64> firstAbs  = abs(_first )        ,
+				const float64 firstAbs  = abs(_first )        ,
 							  secondAbs = abs(_second)        ,
 							  diff      = firstAbs - secondAbs ;
 
-			stack<bool> ExactlyEqual,
-						CloseToZero  ;
+				bool ExactlyEqual,
+					 CloseToZero  ;
 
-			ExactlyEqual = (_first == _second                                          );
-			CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float64Min);
+				ExactlyEqual = (_first == _second                                          );
+				CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float64Min);
 
-			if (CloseToZero)   //Close to zero
-			{
-				return (diff > (Float64Precision * Float64Min)) && !signbit(diff);
+				if (CloseToZero)   //Close to zero
+				{
+					return (diff > (Float64Precision * Float64Min)) && !signbit(diff);
+				}
+				else               //Relative Error
+				{
+					return (diff / min(firstAbs + secondAbs, Float64Max) > Float64Precision) && !signbit(diff);
+				}
 			}
-			else               //Relative Error
+
+			bool ApproxLess(cosnt float64 _first, const float64 _second)
 			{
-				return (diff / min(firstAbs + secondAbs, Float64Max) > Float64Precision) && !signbit(diff);
-			}
-		}
+				//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 
-		sfn ApproxLess(ro float64 _first, ro float64 _second) -> bool
-		{
-			//Implementation influenced by: https://floating-point-gui.de/errors/comparison/, https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-
-			stack<ro float64> firstAbs  = abs(_first )        ,
+				const float64 firstAbs  = abs(_first )        ,
 							  secondAbs = abs(_second)        ,
 							  diff      = firstAbs - secondAbs ;
 
-			stack<bool> ExactlyEqual,
-						CloseToZero  ;
+				bool ExactlyEqual,
+					 CloseToZero  ;
 
-			ExactlyEqual = (_first == _second                                          );
-			CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float64Min);
+				ExactlyEqual = (_first == _second                                          );
+				CloseToZero  = (_first == 0       || _second == 0 || abs(diff) < Float64Min);
 
-			if (CloseToZero)   //Close to zero
-			{
-				return (diff > (Float64Precision * Float64Min)) && signbit(diff);
-			}
-			else               //Relative Error
-			{
-				return (diff / min(firstAbs + secondAbs, Float64Max) > Float64Precision) && signbit(diff);
+				if (CloseToZero)   //Close to zero
+				{
+					return (diff > (Float64Precision * Float64Min)) && signbit(diff);
+				}
+				else               //Relative Error
+				{
+					return (diff / min(firstAbs + secondAbs, Float64Max) > Float64Precision) && signbit(diff);
+				}
 			}
 		}
 	}
 }
-
-Context_End

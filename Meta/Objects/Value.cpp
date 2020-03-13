@@ -13,23 +13,22 @@ Implements the value class.
 
 
 
-Context(NotationEngine::Meta)
-
-SMeta
+namespace NotationEngine::Meta
 {
-	data<ro Ref(TypeData)> Value_TypeID = typeid(Value);
-}
-
-SSource
-{
-	Value::~Value(void)
-	{}
-
-	// Note used need it to go to derived type.
-	sfn Value::GetTypeID(void) ro -> ro Ref(TypeData)
+	inline namespace Meta
 	{
-		return Value_TypeID;
+		const TypeData& Value_TypeID = typeid(Value);
+	}
+
+	inline namespace Source
+	{
+		Value::~Value(void)
+		{}
+
+		// Note used need it to go to derived type.
+		const TypeData& Value::GetTypeID(void) ro
+		{
+			return Value_TypeID;
+		}
 	}
 }
-
-Context_End

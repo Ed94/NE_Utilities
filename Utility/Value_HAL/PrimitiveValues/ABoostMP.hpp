@@ -7,38 +7,37 @@
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SMeta
+namespace NotationEngine::Utility::Value
 {
-	template<typename Type>
-	constant sfn IsMultiprecisionType() -> bool
+	inline namespace Meta
 	{
-		return IsBoostInt<Type>() || IsBoostFloat<Type>();
+		template<typename Type>
+		constexpr bool IsMultiprecisionType()
+		{
+			return IsBoostInt<Type>() || IsBoostFloat<Type>();
+		}
+	}
+
+	inline namespace Source
+	{
+		template<typename MP_Type>
+		class ABoostMP : APrimitiveValue<MP_Type>
+		{
+			static_assert(IsMultiprecisionType<MP_Type>(), "ABoostMP requires a multi-precision primitive.");
+
+		public:
+			virtual ~ABoostMP(void) = NULL;
+
+			virtual const Sign     GetSign (void) const = NULL;
+			virtual const MP_Type& GetValue(void) const = NULL;
+
+			virtual const TypeData& GetTypeID(void) const = NULL;
+
+			virtual void Reinitialize(void) = NULL;
+
+			virtual const string Str(void) const = NULL;
+
+			virtual void SetValue(const MP_Type& ValueToSet) = NULL;
+		};
 	}
 }
-
-SSource
-{
-	template<typename MP_Type>
-	class ABoostMP : APrimitiveValue<MP_Type>
-	{
-		M_constraint(IsMultiprecisionType<MP_Type>(), "ABoostMP requires a multi-precision primitive.");
-
-	public:
-		virtual ~ABoostMP(void) = NULL;
-
-		virtual sfn GetSign (void) ro -> ro     Sign     = NULL;
-		virtual sfn GetValue(void) ro -> ro Ref(MP_Type) = NULL;
-
-		implem sfn GetTypeID(void) ro->ro Ref(TypeData) = NULL;
-
-		implem sfn Reinitialize(void) -> void = NULL;
-
-		implem sfn Str(void) ro -> ro string = NULL;
-
-		virtual sfn SetValue(ro Ref(MP_Type) ValueToSet) -> void = NULL;
-	};
-}
-
-Context_End

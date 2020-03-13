@@ -13,17 +13,16 @@ Implements object.
 
 
 
-Context(NotationEngine::Meta)
-
-SMeta
+namespace NotationEngine::Meta
 {
-	ro Ref(TypeData) Object_TypeID = typeid(Object);
-}
+	inline namespace Meta
+	{
+		const TypeData& Object_TypeID = typeid(Object);
+	}
 
-SSource
-{
-	Object::~Object(void)
-	{}
+	inline namespace Source
+	{
+		Object::~Object(void)
+		{}
+	}
 }
-
-Context_End

@@ -13,25 +13,26 @@ Implements some of the Pointer library.
 
 
 
-Context(NotationEngine::Utility::SmartMemory)
-
-SAlias
+namespace NotationEngine::Utility::SmartMemory
 {
-	using std::make_unique;
-
-	GSFn MkUPtr() -> UPtr<Type>
+	inline namespace Alias
 	{
-		return std::make_unique<Type>();
+		using std::make_unique;
+
+		template<typename Type>
+		UPtr<Type> MkUPtr()
+		{
+			return std::make_unique<Type>();
+		}
+
+		template<typename Type>
+		SPtr<Type> MkSPtr()
+		{
+			return std::make_shared<Type>();
+		}
 	}
 
-	GSFn MkSPtr() -> SPtr<Type>
+	inline namespace Source
 	{
-		return std::make_shared<Type>();
 	}
 }
-
-SSource
-{
-}
-
-Context_End

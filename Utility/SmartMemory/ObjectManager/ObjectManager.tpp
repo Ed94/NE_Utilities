@@ -22,63 +22,59 @@ Defines the template implementation for the Object Manager class.
 
 
 
-Context(NotationEngine::Utility::SmartMemory)
-
-SAlias
+namespace NotationEngine::Utility::SmartMemory
 {
-	using NE_U_C::MakePair;
-}
-
-SSource
-{
-	// Pass by move 
-	template<typename Type>
-	sfn ObjectManager::Request_Object(ro ObjectOwner _requestee) -> Where<IsOfClassObject<Type>(), ObjectRef>
+	inline namespace Alias
 	{
-		//M_constraint(IsOfClassObject<Type>(), "Request_Object requires a type that implements the Object Abstract class");
+		using NE_U_C::MakePair;
+	}
 
-		stack<TypeHash> ObjectID          = typeid(Type)      .hash_code        ();
-		      deduce    possibleTypeEntry = object_Allocations.find     (ObjectID);
-		   // Stack
-
-		if (Contains(possibleTypeEntry))
+	inline namespace Source
+	{
+		// Pass by move 
+		template<typename Type> Where<IsOfClassObject<Type>(), ObjectRef>
+		ObjectManager::Request_Object(ro ObjectOwner _requestee)
 		{
-			// Stack
-			deduce possibleOpenObject = open_Allocations.find(ObjectID);
+			TypeHash ObjectID          = typeid(Type)      .hash_code        ();
+			auto     possibleTypeEntry = object_Allocations.find     (ObjectID);
 
-			if (Available(possibleOpenObject))
+			if (Contains(possibleTypeEntry))
 			{
-				possibleOpenObject->second.front()->Reinitialize();
+				// Stack
+				auto possibleOpenObject = open_Allocations.find(ObjectID);
 
-				stack<ObjectRef> returningObj = possibleOpenObject->second.front().get();
+				if (Available(possibleOpenObject))
+				{
+					possibleOpenObject->second.front()->Reinitialize();
 
-				object_Allocations.at(ObjectID).insert( Heap(MakePair(_requestee, possibleOpenObject->second.front())) );
+					ObjectRef returningObj = possibleOpenObject->second.front().get();
 
-				possibleOpenObject->second.pop_front();
+					object_Allocations.at(ObjectID).insert( MakePair(_requestee, possibleOpenObject->second.front()) );
 
-				return returningObj;
+					possibleOpenObject->second.pop_front();
+
+					return returningObj;
+				}
+				else
+				{
+					SPtr<Object> newObject    = MkSPtr<Type> ();
+					ObjectRef    returningObj = newObject.get();
+
+					object_Allocations.at(ObjectID).insert({ _requestee, move(newObject) });
+
+					return returningObj;
+				}
 			}
 			else
 			{
-				stack< SPtr<Object> > newObject    = Heap(MkSPtr<Type>());
-				stack< ObjectRef    > returningObj = newObject.get     ();
+				SPtr<Type> newObject    = MkSPtr<Type> ();
+				ObjectRef  returningObj = newObject.get();
 
-				object_Allocations.at(ObjectID).insert({ _requestee, move(newObject) });
+				object_Allocations             .insert( MakePair(ObjectID  , Make_AllocationRegistry()) );
+				object_Allocations.at(ObjectID).insert( MakePair(_requestee, newObject                ) );
 
 				return returningObj;
 			}
 		}
-		else
-		{
-			stack< SPtr<Type> > newObject    = Heap(MkSPtr<Type> ());
-			stack< ObjectRef  > returningObj = newObject.get      ();
-
-			object_Allocations             .insert( Heap(MakePair(ObjectID  , Heap(Make_AllocationRegistry()) )) );
-			object_Allocations.at(ObjectID).insert( Heap(MakePair(_requestee, newObject                       )) );
-
-			return returningObj;
-		}
 	}
 }
-
-Context_End

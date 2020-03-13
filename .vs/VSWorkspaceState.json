@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Utility",
+    "\\Utility\\Value_HAL",
+    "\\Utility\\Value_HAL\\Operations",
+    "\\Utility\\Value_HAL\\PrimitiveValues",
+    "\\Utility\\Value_HAL\\PrimitiveValues\\Operations",
+    "\\Utility\\Value_HAL\\ValueManager"
+  ],
+  "SelectedNode": "\\Utility\\SmartMemory",
+  "PreviewInSolutionExplorer": false
+}

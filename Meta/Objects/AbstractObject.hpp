@@ -18,24 +18,23 @@ Defines the abstract object class.
 
 
 
-Context(NotationEngine::Meta)
-
-SSource
+namespace NotationEngine::Meta
 {
-	/*
-	The base class for any abstract object in notation engine.
-
-	An object that exists without physical referents, exists type_as a type of object.
-	*/
-	class AbstractObject : public Object
+	inline namespace Source
 	{
-	public:
-		virtual ~AbstractObject() = NULL;
+		/*
+		The base class for any abstract object in notation engine.
 
-		implem sfn GetTypeID   (void) ro -> ro Ref(TypeData) = NULL;
-		implem sfn Reinitialize(void)    ->        void      = NULL;
-		implem sfn Str         (void) ro -> ro     string    = NULL;
-	};
+		An object that exists without physical referents, exists type_as a type of object.
+		*/
+		class AbstractObject : public Object
+		{
+		public:
+			virtual ~AbstractObject() = NULL;
+
+			virtual const TypeData& GetTypeID   (void) const = NULL;
+			virtual       void      Reinitialize(void)       = NULL;
+			virtual const string    Str         (void) const = NULL;
+		};
+	}
 }
-
-Context_End

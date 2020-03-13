@@ -15,67 +15,65 @@
 
 // Notation Engine
 #include "Dev/DevMeta.hpp"
-#include "Context/Context_Util.hpp"
 
 
 
-Context(NotationEngine::Utility)
-
-SAlias
+namespace NotationEngine::Utility
 {
-	using uInt256   = boost::multiprecision::uint256_t       ;   // 128-bit unsigned integer.
-	using sInt256   = boost::multiprecision::int256_t        ;   // 128-bit signed integer.
-	using Float_P50 = boost::multiprecision::cpp_bin_float_50;   // 50-decimal place precision float.
-}
-
-SMeta
-{
-	template<typename Type>
-	constant sfn IsBoostInt() -> bool
+	inline namespace Alias
 	{
-		return IsSameType<Type, uInt256>() ||
-			   IsSameType<Type, sInt256>()   ;
+		using uInt256   = boost::multiprecision::uint256_t       ;   // 128-bit unsigned integer.
+		using sInt256   = boost::multiprecision::int256_t        ;   // 128-bit signed integer.
+		using Float_P50 = boost::multiprecision::cpp_bin_float_50;   // 50-decimal place precision float.
 	}
 
-	template<typename Type>
-	constant sfn IsBoostFloat() -> bool
+	inline namespace Meta
 	{
-		return IsSameType<Type, Float_P50>();
-	}
-}
-
-SSource
-{
-	superpos ro Ref(Float_P50) FloatP50_Min       = NumLimits<Float_P50>::min          ();
-	superpos ro Ref(Float_P50) FloatP50_MinNeg    = FloatP50_Min * -1.0                  ;
-	superpos ro Ref(Float_P50) FloatP50_Max       = NumLimits<Float_P50>::max          ();
-	superpos ro Ref(Float_P50) FloatP50_MaxNeg    = FloatP50_Max * -1.0                  ;
-	superpos ro Ref(Float_P50) FloatP50_Precision = NumLimits<Float_P50>::epsilon      ();
-	superpos ro Ref(Float_P50) FloatP50_Infinity  = NumLimits<Float_P50>::infinity     ();
-	superpos ro Ref(Float_P50) FloatP50_QNaN      = NumLimits<Float_P50>::quiet_NaN    ();
-	superpos ro Ref(Float_P50) FloatP50_SNaN      = NumLimits<Float_P50>::signaling_NaN();
-
-	filter BInt
-	{
-		template<typename BInt>
-		constant sfn Signum(ro Ref(BInt) _value) -> Where<IsBoostInt<BInt>(), ro Sign>
+		template<typename Type>
+		constexpr bool IsBoostInt()
 		{
-			return Sign((BInt(0) < _value) - (_value < BInt(0)));
+			return IsSameType<Type, uInt256>() ||
+				   IsSameType<Type, sInt256>()   ;
+		}
+
+		template<typename Type>
+		constexpr bool IsBoostFloat()
+		{
+			return IsSameType<Type, Float_P50>();
 		}
 	}
 
-	filter BFloat
+	inline namespace Source
 	{
-		sfn ApproxEqual  (ro Ref(Float_P50) Subject, ro Ref(Float_P50) Reference) -> bool;
-		sfn ApproxGreater(ro Ref(Float_P50) Subject, ro Ref(Float_P50) Reference) -> bool;
-		sfn ApproxLess   (ro Ref(Float_P50) Subject, ro Ref(Float_P50) Reference) -> bool;
+		inline const Float_P50& FloatP50_Min       = NumLimits<Float_P50>::min          ();
+		inline const Float_P50& FloatP50_MinNeg    = FloatP50_Min * -1.0                  ;
+		inline const Float_P50& FloatP50_Max       = NumLimits<Float_P50>::max          ();
+		inline const Float_P50& FloatP50_MaxNeg    = FloatP50_Max * -1.0                  ;
+		inline const Float_P50& FloatP50_Precision = NumLimits<Float_P50>::epsilon      ();
+		inline const Float_P50& FloatP50_Infinity  = NumLimits<Float_P50>::infinity     ();
+		inline const Float_P50& FloatP50_QNaN      = NumLimits<Float_P50>::quiet_NaN    ();
+		inline const Float_P50& FloatP50_SNaN      = NumLimits<Float_P50>::signaling_NaN();
 
-		template<typename BFloat>
-		constant sfn Signum(ro Ref(BFloat) _value) -> Where<IsBoostFloat<BFloat>(), ro Sign>
+		inline namespace BInt
 		{
-			return Sign( ApproxLess(Float_P50(0.0), _value) - ApproxLess(_value, Float_P50(0.0)) );
+			template<typename BInt> constexpr Where<IsBoostInt<BInt>(), const Sign> 
+			Signum(const BInt& _value)
+			{
+				return Sign((BInt(0) < _value) - (_value < BInt(0)));
+			}
+		}
+
+		inline namespace BFloat
+		{
+			bool ApproxEqual  (const Float_P50& Subject, const Float_P50& Reference);
+			bool ApproxGreater(const Float_P50& Subject, const Float_P50& Reference);
+			bool ApproxLess   (const Float_P50& Subject, const Float_P50& Reference);
+
+			template<typename BFloat> constexpr Where<IsBoostFloat<BFloat>(), const Sign> 
+			Signum(const BFloat& _value)
+			{
+				return Sign( ApproxLess(Float_P50(0.0), _value) - ApproxLess(_value, Float_P50(0.0)) );
+			}
 		}
 	}
 }
-
-Context_End

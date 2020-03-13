@@ -17,31 +17,30 @@ Defines a value class.
 
 
 
-Context(NotationEngine::Meta)
-
-SAlias
+namespace NotationEngine::Meta
 {
-	// C++
-
-	using std::string;
-}
-
-SSource
-{
-	/*
-	The image of an object, or format.
-
-	The state of a type of object.
-	*/
-	class Value : Object
+	inline namespace Alias
 	{
-	public:
-		virtual ~Value(void) = NULL;
+		// C++
 
-		implem sfn GetTypeID   (void) ro -> ro Ref(TypeData) = NULL;
-		implem sfn Reinitialize(void)    ->        void      = NULL;
-		implem sfn Str         (void) ro -> ro     string    = NULL;
-	};
+		using std::string;
+	}
+
+	inline namespace Source
+	{
+		/*
+		The image of an object, or format.
+
+		The state of a type of object.
+		*/
+		class Value : Object
+		{
+		public:
+			virtual ~Value(void) = NULL;
+
+			virtual const TypeData& GetTypeID   (void) const = NULL;
+			virtual       void      Reinitialize(void)       = NULL;
+			virtual const string    Str         (void) const = NULL;
+		};
+	}
 }
-
-Context_End

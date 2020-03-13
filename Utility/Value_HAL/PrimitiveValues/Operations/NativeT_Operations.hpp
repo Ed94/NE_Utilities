@@ -20,26 +20,25 @@ TODO: Native generics should not be passed by reference (no need for indirection
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SSource
+namespace NotationEngine::Utility::Value
 {
-	// Comparison
+	inline namespace Source
+	{
+		// Comparison
 
-	template<typename NType> sfn operator== (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> bool;
-	template<typename NType> sfn operator!= (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> bool;
-	template<typename NType> sfn operator<  (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> bool;
-	template<typename NType> sfn operator>  (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> bool;
+		template<typename NType> bool operator== (const NativeT<NType> Subject, const NativeT<NType> Reference) -> bool;
+		template<typename NType> bool operator!= (const NativeT<NType> Subject, const NativeT<NType> Reference) -> bool;
+		template<typename NType> bool operator<  (const NativeT<NType> Subject, const NativeT<NType> Reference) -> bool;
+		template<typename NType> bool operator>  (const NativeT<NType> Subject, const NativeT<NType> Reference) -> bool;
 
-	// Arithmetic
+		// Arithmetic
 
-	template<typename NType> sfn operator+ (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> NativeT<NType>;
-	template<typename NType> sfn operator- (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> NativeT<NType>;
-	template<typename NType> sfn operator* (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> NativeT<NType>;
-	template<typename NType> sfn operator/ (ro NativeT<NType> Subject, ro NativeT<NType> Reference) -> NativeT<NType>;
+		template<typename NType> NativeT<NType> operator+ (const NativeT<NType> Subject, const NativeT<NType> Reference);
+		template<typename NType> NativeT<NType> operator- (const NativeT<NType> Subject, const NativeT<NType> Reference);
+		template<typename NType> NativeT<NType> operator* (const NativeT<NType> Subject, const NativeT<NType> Reference);
+		template<typename NType> NativeT<NType> operator/ (const NativeT<NType> Subject, const NativeT<NType> Reference);
+	}
 }
-
-Context_End
 
 
 

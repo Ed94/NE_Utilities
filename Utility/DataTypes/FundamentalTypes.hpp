@@ -14,111 +14,106 @@ Contains Aliases and other helpful definitions for the fundamental types support
 
 // Notation Engine
 #include "Dev/DevMeta.hpp"
-#include "Context/Context_Util.hpp"
 #include "Utility/Reflection/Meditate.hpp"
 
 
 
-Context(NotationEngine::Utility)
-								
-SAlias
+namespace NotationEngine::Utility
 {
-	// C++
-
-	//Integers
-
-	//Signed
-
-	using sInt8  = signed           char;
-	using sInt16 = signed short     int ;
-	using sInt32 = signed           int ;
-	using sInt64 = signed long long int ;
-
-	//Unsigned
-
-	using uInt8  = unsigned            char;
-	using uInt16 = unsigned      short int ;
-	using uInt32 = unsigned            int ;
-	using uInt64 = unsigned long long  int ;
-
-	//Floats
-
-	using float32 =      float ;
-	using float64 =      double;
-	using floatEP = long double;   // Not accessible in MSVC (Turns into regular doubles)
-
-	// Notation Engine
-
-	using NE_U_R::IsSameType;
-	using NE_U_R::TypeData  ;
-	using NE_U_R::Where     ;
-}
-
-SMeta
-{
-	template<typename Type>
-	constant sfn IsInt() -> bool
+	inline namespace Alias
 	{
-		return IsSameType<Type, sInt8 >() || 
-			   IsSameType<Type, sInt16>() || 
-			   IsSameType<Type, sInt32>() || 
-			   IsSameType<Type, sInt64>() ||
-			   IsSameType<Type, uInt8 >() ||
-			   IsSameType<Type, uInt16>() ||
-			   IsSameType<Type, uInt32>() ||
-			   IsSameType<Type, uInt64>()   ;
+		// C++
+
+		//Integers
+
+		//Signed
+
+		using sInt8  = signed           char;
+		using sInt16 = signed short     int ;
+		using sInt32 = signed           int ;
+		using sInt64 = signed long long int ;
+
+		//Unsigned
+
+		using uInt8  = unsigned            char;
+		using uInt16 = unsigned      short int ;
+		using uInt32 = unsigned            int ;
+		using uInt64 = unsigned long long  int ;
+
+		//Floats
+
+		using float32 =      float ;
+		using float64 =      double;
+		using floatEP = long double;   // Not accessible in MSVC (Turns into regular doubles)
+
+		// Notation Engine
+
+		using NE_U_R::IsSameType;
+		using NE_U_R::TypeData  ;
+		using NE_U_R::Where     ;
 	}
 
-	template<typename Type>
-	constant sfn IsFloat() -> bool
+	inline namespace Meta
 	{
-		return IsSameType<Type, float32>() || IsSameType<Type, float64>() || IsSameType<Type, floatEP>();
-	}
-}
-
-SSource
-{
-	enum class Sign
-	{
-		Positive =  1,
-		Neutral  =  0,
-		Negative = -1,
-	};
-
-	filter Int
-	{
-		template<typename Int>
-		constant sfn Signum(ro Int _value) -> Where<IsInt<Int>(), ro Sign>
+		template<typename Type>
+		constexpr bool IsInt()
 		{
-			//M_constraint(IsInt<Int>(), "Type for this function must be an sInt.");
-
-			return Sign( (Int(0) < _value) - (_value < Int(0)) );
-		}
-	}
-	
-	filter Float
-	{
-		template<typename Float>
-		constant sfn Signum(ro Float _value) -> Where<IsFloat<Float>(), ro Sign>
-		{
-			//M_constraint(IsFloat<Float>(), "Type for this function must be a float.");
-
-			return Sign( ( Float(0.0) < _value ) - ( _value < Float(0.0) ) );
+			return IsSameType<Type, sInt8 >() || 
+				   IsSameType<Type, sInt16>() || 
+				   IsSameType<Type, sInt32>() || 
+				   IsSameType<Type, sInt64>() ||
+				   IsSameType<Type, uInt8 >() ||
+				   IsSameType<Type, uInt16>() ||
+				   IsSameType<Type, uInt32>() ||
+				   IsSameType<Type, uInt64>()   ;
 		}
 
-		sfn ApproxEqual  (ro float32 First, ro float32 Second) -> bool;
-		sfn ApproxGreater(ro float32 First, ro float32 Second) -> bool;
-		sfn ApproxLess   (ro float32 First, ro float32 Second) -> bool;
+		template<typename Type>
+		constexpr bool IsFloat()
+		{
+			return IsSameType<Type, float32>() || IsSameType<Type, float64>() || IsSameType<Type, floatEP>();
+		}
+	}
 
-		sfn ApproxEqual  (ro float64 First, ro float64 Second) -> bool;
-		sfn ApproxGreater(ro float64 First, ro float64 Second) -> bool;
-		sfn ApproxLess   (ro float64 First, ro float64 Second) -> bool;
+	inline namespace Source
+	{
+		enum class Sign
+		{
+			Positive =  1,
+			Neutral  =  0,
+			Negative = -1,
+		};
 
-		template<typename Float> sfn ApproxEqual  (ro Float First, ro Float Second) -> Where<IsFloat<Float>(), bool>;
-		template<typename Float> sfn ApproxGreater(ro Float First, ro Float Second) -> Where<IsFloat<Float>(), bool>;
-		template<typename Float> sfn ApproxLess   (ro Float First, ro Float Second) -> Where<IsFloat<Float>(), bool>;
+		inline namespace Int
+		{
+			template<typename Int>
+			constexpr Where<IsInt<Int>(), const Sign> 
+			Signum(const Int _value)
+			{
+				return Sign( (Int(0) < _value) - (_value < Int(0)) );
+			}
+		}
+		
+		inline namespace Float
+		{
+			template<typename Float> 
+			constexpr Where<IsFloat<Float>(), const Sign> 
+			Signum(const Float _value)
+			{
+				return Sign( ( Float(0.0) < _value ) - ( _value < Float(0.0) ) );
+			}
+
+			bool ApproxEqual  (const float32 First, const float32 Second);
+			bool ApproxGreater(const float32 First, const float32 Second);
+			bool ApproxLess   (const float32 First, const float32 Second);
+
+			bool ApproxEqual  (const float64 First, const float64 Second);
+			bool ApproxGreater(const float64 First, const float64 Second);
+			bool ApproxLess   (const float64 First, const float64 Second);
+
+			template<typename Float> Where<IsFloat<Float>(), bool> ApproxEqual  (const Float First, const Float Second);
+			template<typename Float> Where<IsFloat<Float>(), bool> ApproxGreater(const Float First, const Float Second);
+			template<typename Float> Where<IsFloat<Float>(), bool> ApproxLess   (const Float First, const Float Second);
+		}
 	}
 }
-
-
-Context_End
