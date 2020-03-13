@@ -1,0 +1,365 @@
+Note: Originally starting on line 205 of SafeInt.hpp's orignal source. (To 566)
+
+/************* Compiler Options *****************************************************************************************************
+
+SafeInt supports several compile-time options that can change the behavior of the class.
+
+Compiler options:
+SAFEINT_ASSERT_ON_EXCEPTION        - it is often easier to stop on an assert and figure out a problem than to try and figure out
+                                     how you landed in the catch block.
+SafeIntDefaultExceptionHandler     - if you'd like to replace the exception handlers SafeInt provides, define your replacement and
+                                     define this. Note - two built in (Windows-specific) options exist:
+                                     - SAFEINT_FAILFAST - bypasses all exception handlers, exits the app with an exception
+                                     - SAFEINT_RAISE_EXCEPTION - throws Win32 exceptions, which can be caught
+SAFEINT_DISALLOW_UNSIGNED_NEGATION - Invoking the unary negation operator may create warnings, but if you'd like it to completely fail
+                                     to compile, define this.
+SAFEINT_DISABLE_BINARY_ASSERT      - binary AND, OR or XOR operations on mixed size types can produce unexpected results. If you do
+                                     this, the default is to assert. Set this if you prefer not to assert under these conditions.
+SIZE_T_CAST_NEEDED                 - some compilers complain if there is not a cast to size_t, others complain if there is one.
+                                     This lets you not have your compiler complain.
+
+************************************************************************************************************************************/
+
+/*
+*  The SafeInt class is designed to have as low an overhead as possible
+*  while still ensuring that all integer operations are conducted safely.
+*  Nearly every operator has been overloaded, with a very few exceptions.
+*
+*  A usability-safety trade-off has been made to help ensure safety. This
+*  requires that every operation return either a SafeInt or a bool. If we
+*  allowed an operator to return a base integer type T, then the following
+*  can happen:
+*
+*  char i = SafeInt<char>(32) * 2 + SafeInt<char>(16) * 4;
+*
+*  The * operators take precedence, get overloaded, return a char, and then
+*  you have:
+*
+*  char i = (char)64 + (char)64; //overflow!
+*
+*  This situation would mean that safety would depend on usage, which isn't
+*  acceptable.
+*
+*  One key operator that is missing is an implicit cast to type T. The reason for
+*  this is that if there is an implicit cast operator, then we end up with
+*  an ambiguous compile-time precedence. Because of this amiguity, there
+*  are two methods that are provided:
+*
+*  Casting operators for every native integer type
+*  Version 3 note - it now compiles correctly for size_t without warnings
+*
+*  SafeInt::Ptr()   - returns the address of the internal integer
+*  Note - the '&' (address of) operator has been overloaded and returns
+*         the address of the internal integer.
+*
+*  The SafeInt class should be used in any circumstances where ensuring
+*  integrity of the calculations is more important than performance. See Performance
+*  Notes below for additional information.
+*
+*  Many of the conditionals will optimize out or be inlined for a release
+*  build (especially with /Ox), but it does have significantly more overhead,
+*  especially for signed numbers. If you do not _require_ negative numbers, use
+*  unsigned integer types - certain types of problems cannot occur, and this class
+*  performs most efficiently.
+*
+*  Here's an example of when the class should ideally be used -
+*
+*  void* AllocateMemForStructs(int StructSize, int HowMany)
+*  {
+*     SafeInt<unsigned long> s(StructSize);
+*
+*     s *= HowMany;
+*
+*     return malloc(s);
+*
+*  }
+*
+*  Here's when it should NOT be used:
+*
+*  void foo()
+*  {
+*    int i;
+*
+*    for(i = 0; i < 0xffff; i++)
+*      ....
+*  }
+*
+*  Error handling - a SafeInt class will throw exceptions if something
+*  objectionable happens. The exceptions are SafeIntException classes,
+*  which contain an enum as a code.
+*
+*  Typical usage might be:
+*
+*  bool foo()
+*  {
+*    SafeInt<unsigned long> s; //note that s == 0 unless set
+*
+*    try{
+*      s *= 23;
+*      ....
+*    }
+*    catch(SafeIntException err)
+*    {
+*       //handle errors here
+*    }
+*  }
+*
+*  Update for 3.0 - the exception class is now a template parameter.
+*  You can replace the exception class with any exception class you like. This is accomplished by:
+*  1) Create a class that has the following interface:
+*
+    template <> class YourSafeIntExceptionHandler < YourException >
+    {
+    public:
+        static __declspec(noreturn) void __stdcall SafeIntOnOverflow()
+        {
+            throw YourException( YourSafeIntArithmeticOverflowError );
+        }
+
+        static __declspec(noreturn) void __stdcall SafeIntOnDivZero()
+        {
+            throw YourException( YourSafeIntDivideByZeroError );
+        }
+    };
+*
+*  Note that you don't have to throw C++ exceptions, you can throw Win32 exceptions, or do
+*  anything you like, just don't return from the call back into the code.
+*
+*  2) Either explicitly declare SafeInts like so:
+*     SafeInt< int, YourSafeIntExceptionHandler > si;
+*  or
+*     #define SafeIntDefaultExceptionHandler YourSafeIntExceptionHandler
+*
+*  Performance:
+*
+*  Due to the highly nested nature of this class, you can expect relatively poor
+*  performance in unoptimized code. In tests of optimized code vs. correct inline checks
+*  in native code, this class has been found to take approximately 8% more CPU time (this varies),
+*  most of which is due to exception handling. Solutions:
+*
+*  1) Compile optimized code - /Ox is best, /O2 also performs well. Interestingly, /O1
+*     (optimize for size) does not work as well.
+*  2) If that 8% hit is really a serious problem, walk through the code and inline the
+*     exact same checks as the class uses.
+*  3) Some operations are more difficult than others - avoid using signed integers, and if
+*     possible keep them all the same size. 64-bit integers are also expensive. Mixing
+*     different integer sizes and types may prove expensive. Be aware that literals are
+*     actually ints. For best performance, cast literals to the type desired.
+*
+*
+*  Performance update
+*  The current version of SafeInt uses template specialization to force the compiler to invoke only the
+*  operator implementation needed for any given pair of types. This will dramatically improve the perf
+*  of debug builds.
+*
+*  3.0 update - not only have we maintained the specialization, there were some cases that were overly complex,
+*  and using some additional cases (e.g. std::int64_t and std::uint64_t) resulted in some simplification.
+*  Additionally, there was a lot of work done to better optimize the 64-bit multiplication.
+*
+*  Binary Operators
+*
+*  All of the binary operators have certain assumptions built into the class design.
+*  This is to ensure correctness. Notes on each class of operator follow:
+*
+*  Arithmetic Operators (*,/,+,-,%)
+*  There are three possible variants:
+*  SafeInt< T, E > op SafeInt< T, E >
+*  SafeInt< T, E > op U
+*  U op SafeInt< T, E >
+*
+*  The SafeInt< T, E > op SafeInt< U, E > variant is explicitly not supported, and if you try to do
+*  this the compiler with throw the following error:
+*
+*  error C2593: 'operator *' is ambiguous
+*
+*  This is because the arithmetic operators are required to return a SafeInt of some type.
+*  The compiler cannot know whether you'd prefer to get a type T or a type U returned. If
+*  you need to do this, you need to extract the value contained within one of the two using
+*  the casting operator. For example:
+*
+*  SafeInt< T, E > t, result;
+*  SafeInt< U, E > u;
+*
+*  result = t * (U)u;
+*
+*  Comparison Operators
+*  Because each of these operators return type bool, mixing SafeInts of differing types is
+*  allowed.
+*
+*  Shift Operators
+*  Shift operators always return the type on the left hand side of the operator. Mixed type
+*  operations are allowed because the return type is always known.
+*
+*  Boolean Operators
+*  Like comparison operators, these overloads always return type bool, and mixed-type SafeInts
+*  are allowed. Additionally, specific overloads exist for type bool on both sides of the
+*  operator.
+*
+*  Binary Operators
+*  Mixed-type operations are discouraged, however some provision has been made in order to
+*  enable things like:
+*
+*  SafeInt<char> c = 2;
+*
+*  if(c & 0x02)
+*    ...
+*
+*  The "0x02" is actually an int, and it needs to work.
+*  In the case of binary operations on integers smaller than 32-bit, or of mixed type, corner
+*  cases do exist where you could get unexpected results. In any case where SafeInt returns a different
+*  result than the underlying operator, it will call assert(). You should examine your code and cast things
+*  properly so that you are not programming with side effects.
+*
+*  Documented issues:
+*
+*  This header compiles correctly at /W4 using VC++ 8 (Version 14.00.50727.42) and later.
+*  As of this writing, I believe it will also work for VC 7.1, but not for VC 7.0 or below.
+*  If you need a version that will work with lower level compilers, try version 1.0.7. None
+*  of them work with Visual C++ 6, and gcc didn't work very well, either, though this hasn't
+*  been tried recently.
+*
+*  It is strongly recommended that any code doing integer manipulation be compiled at /W4
+*  - there are a number of warnings which pertain to integer manipulation enabled that are
+*  not enabled at /W3 (default for VC++)
+*
+*  Perf note - postfix operators are slightly more costly than prefix operators.
+*  Unless you're actually assigning it to something, ++SafeInt is less expensive than SafeInt++
+*
+*  The comparison operator behavior in this class varies from the ANSI definition, which is
+*  arguably broken. As an example, consider the following:
+*
+*  unsigned int l = 0xffffffff;
+*  char c = -1;
+*
+*  if(c == l)
+*    printf("Why is -1 equal to 4 billion???\n");
+*
+*  The problem here is that c gets cast to an int, now has a value of 0xffffffff, and then gets
+*  cast again to an unsigned int, losing the true value. This behavior is despite the fact that
+*  an std::int64_t exists, and the following code will yield a different (and intuitively correct)
+*  answer:
+*
+*  if((std::int64_t)c == (std::int64_t)l))
+*    printf("Why is -1 equal to 4 billion???\n");
+*  else
+*    printf("Why doesn't the compiler upcast to 64-bits when needed?\n");
+*
+*  Note that combinations with smaller integers won't display the problem - if you
+*  changed "unsigned int" above to "unsigned short", you'd get the right answer.
+*
+*  Revision history:
+*
+*  Oct 12, 2003 - Created
+*  Author - David LeBlanc - dleblanc@microsoft.com
+*
+*  Oct 27, 2003 - fixed numerous items pointed out by michmarc and bdawson
+*  Dec 28, 2003 - 1.0
+*                 added support for mixed-type operations
+*                 thanks to vikramh
+*                 also fixed broken std::int64_t multiplication section
+*                 added extended support for mixed-type operations where possible
+*  Jan 28, 2004 - 1.0.1
+*                 changed WCHAR to wchar_t
+*                 fixed a construct in two mixed-type assignment overloads that was
+*                 not compiling on some compilers
+*                 Also changed name of private method to comply with standards on
+*                 reserved names
+*                 Thanks to Niels Dekker for the input
+*  Feb 12, 2004 - 1.0.2
+*                 Minor changes to remove dependency on Windows headers
+*                 Consistently used std::int16_t, std::int32_t and std::int64_t to ensure
+*                 portability
+*  May 10, 2004 - 1.0.3
+*                 Corrected bug in one case of GreaterThan
+*  July 22, 2004 - 1.0.4
+*                 Tightened logic in addition check (saving 2 instructions)
+*                 Pulled error handler out into function to enable user-defined replacement
+*                 Made internal type of SafeIntException an enum (as per Niels' suggestion)
+*                 Added casts for base integer types (as per Scott Meyers' suggestion)
+*                 Updated usage information - see important new perf notes.
+*                 Cleaned up several const issues (more thanks to Niels)
+*
+*  Oct 1, 2004 - 1.0.5
+*                 Added support for SEH exceptions instead of C++ exceptions - Win32 only
+*                 Made handlers for DIV0 and overflows individually overridable
+*                 Commented out the destructor - major perf gains here
+*                 Added cast operator for type long, since long != std::int32_t
+*                  Corrected a couple of missing const modifiers
+*                 Fixed broken >= and <= operators for type U op SafeInt< T, E >
+*  Nov 5, 2004 - 1.0.6
+*                 Implemented new logic in binary operators to resolve issues with
+*                 implicit casts
+*                 Fixed casting operator because char != signed char
+*                 Defined std::int32_t as int instead of long
+*                 Removed unsafe SafeInt::Value method
+*                 Re-implemented casting operator as a result of removing Value method
+*  Dec 1, 2004 - 1.0.7
+*                 Implemented specialized operators for pointer arithmetic
+*                 Created overloads for cases of U op= SafeInt. What you do with U
+*                 after that may be dangerous.
+*                 Fixed bug in corner case of MixedSizeModulus
+*                 Fixed bug in MixedSizeMultiply and MixedSizeDivision with input of 0
+*                 Added throw() decorations
+*
+*  Apr 12, 2005 - 2.0
+*                 Extensive revisions to leverage template specialization.
+*  April, 2007    Extensive revisions for version 3.0
+*  Nov 22, 2009   Forked from MS internal code
+*                 Changes needed to support gcc compiler - many thanks to Niels Dekker
+*                 for determining not just the issues, but also suggesting fixes.
+*                 Also updating some of the header internals to be the same as the upcoming Visual Studio version.
+*
+*  Jan 16, 2010   64-bit gcc has long == std::int64_t, which means that many of the existing 64-bit
+*                 templates are over-specialized. This forces a redefinition of all the 64-bit
+*                 multiplication routines to use pointers instead of references for return
+*                 values. Also, let's use some intrinsics for x64 Microsoft compiler to
+*                 reduce code size, and hopefully improve efficiency.
+*
+*  June 21, 2014  Better support for clang, higher warning levels supported for all 3 primary supported
+                  compilers (Visual Studio, clang, gcc).
+                  Also started to converge the code base such that the public CodePlex version will
+                  be a drop-in replacement for the Visual Studio version.
+
+* Feb 12, 2018    Fixed floating point bug
+*                 Fix to allow initialization by an enum
+*                 Add support for static_assert, make it default to fix compiler warnings from C_ASSERT on gcc, clang
+*                 Changed throw() to noexcept
+
+* March, 2018     Introduced support for constexpr, both the C++11 and C++14 flavors work. The C++14 standard
+                  allows for much more thorough usage, and should be preferred.
+
+*  Note about code style - throughout this class, casts will be written using C-style (T),
+*  not C++ style static_cast< T >. This is because the class is nearly always dealing with integer
+*  types, and in this case static_cast and a C cast are equivalent. Given the large number of casts,
+*  the code is a little more readable this way. In the event a cast is needed where static_cast couldn't
+*  be substituted, we'll use the new templatized cast to make it explicit what the operation is doing.
+*
+************************************************************************************************************
+* Version 3.0 changes:
+*
+* 1) The exception type thrown is now replacable, and you can throw your own exception types. This should help
+*    those using well-developed exception classes.
+* 2) The 64-bit multiplication code has had a lot of perf work done, and should be faster than 2.0.
+* 3) There is now limited floating point support. You can initialize a SafeInt with a floating point type,
+*    and you can cast it out (or assign) to a float as well.
+* 4) There is now an Align method. I noticed people use this a lot, and rarely check errors, so now you have one.
+*
+* Another major improvement is the addition of external functions - if you just want to check an operation, this can now happen:
+* All of the following can be invoked without dealing with creating a class, or managing exceptions. This is especially handy
+* for 64-bit porting, since SafeCast compiles away for a 32-bit cast from size_t to unsigned long, but checks it for 64-bit.
+*
+* inline bool SafeCast( const T From, U& To ) throw()
+* inline bool SafeEquals( const T t, const U u ) throw()
+* inline bool SafeNotEquals( const T t, const U u ) throw()
+* inline bool SafeGreaterThan( const T t, const U u ) throw()
+* inline bool SafeGreaterThanEquals( const T t, const U u ) throw()
+* inline bool SafeLessThan( const T t, const U u ) throw()
+* inline bool SafeLessThanEquals( const T t, const U u ) throw()
+* inline bool SafeModulus( const T& t, const U& u, T& result ) throw()
+* inline bool SafeMultiply( T t, U u, T& result ) throw()
+* inline bool SafeDivide( T t, U u, T& result ) throw()
+* inline bool SafeAdd( T t, U u, T& result ) throw()
+* inline bool SafeSubtract( T t, U u, T& result ) throw()
+*
+*/
+
