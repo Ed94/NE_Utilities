@@ -105,8 +105,6 @@ SSource
 		{
 			M_constraint(IsFloat<Float>(), "Type must be a fundamental float.");
 
-			// This is a generic form of what is found in Native32, 64 and EP for the Float types but for bounds.
-
 			ro stack<Float> floatMin  = NumLimits<Float>::min    ();
 			ro stack<Float> floatMax  = NumLimits<Float>::max    ();
 			ro stack<Float> precision = NumLimits<Float>::epsilon();

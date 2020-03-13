@@ -163,7 +163,7 @@ SSource
 		}
 	}
 
-	sfn operator* (ro Ref(NativeT<uInt16>) _subject, ro Ref(NativeT<uInt16>) _reference) -> NativeT<uInt16>
+	sfn operator* (ro NativeT<uInt16> _subject, ro NativeT<uInt16> _reference) -> NativeT<uInt16>
 	{
 		stack<uInt16> result = _subject.GetValue() + _reference.GetValue();
 
