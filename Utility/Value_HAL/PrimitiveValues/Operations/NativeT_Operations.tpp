@@ -17,33 +17,32 @@ Implements the Native Template operations for fundamental types.
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SSource
+namespace NotationEngine::Utility::Value
 {
-	template<typename NType_S, typename NType_R>
-	sfn operator== (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
+	inline namespace Source
 	{
-		return _subject.GetValue() == _reference.GetValue();
-	}
+		template<typename NType_S, typename NType_R>
+		bool operator== (const NativeT<NType_S> _subject, const NativeT<NType_R> _reference)
+		{
+			return _subject.GetValue() == _reference.GetValue();
+		}
 
-	template<typename NType_S, typename NType_R>
-	sfn operator!= (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
-	{
-		return _subject.GetValue() != _reference.GetValue();
-	}
+		template<typename NType_S, typename NType_R>
+		bool operator!= (const NativeT<NType_S> _subject, const NativeT<NType_R> _reference)
+		{
+			return _subject.GetValue() != _reference.GetValue();
+		}
 
-	template<typename NType_S, typename NType_R>
-	sfn operator< (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
-	{
-		return _subject.GetValue() < _reference.GetValue();
-	}
+		template<typename NType_S, typename NType_R>
+		bool operator< (const NativeT<NType_S> _subject, const NativeT<NType_R> _reference)
+		{
+			return _subject.GetValue() < _reference.GetValue();
+		}
 
-	template<typename NType_S, typename NType_R>
-	sfn operator> (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
-	{
-		return _subject.GetValue() > _reference.GetValue();
+		template<typename NType_S, typename NType_R>
+		bool operator> (const NativeT<NType_S> _subject, const NativeT<NType_R> _reference)
+		{
+			return _subject.GetValue() > _reference.GetValue();
+		}
 	}
 }
-
-Context_End

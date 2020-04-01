@@ -17,200 +17,199 @@ Implements the Native Template operations for 8-bit fundamental types.
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SSource
+namespace NotationEngine::Utility::Value
 {
-	// TODO: Requires optimization.
-
-	// Comparison:
-
-	// Operator ==
-
-	sfn operator==(ro NativeT<sInt8> _subject, ro NativeT<uInt8> _reference) -> bool
+	inline namespace Source
 	{
-		return _reference.GetValue() <= SInt8Max ? _subject.GetValue() == sInt8(_reference.GetValue()) : false;
-	}
-	
-	sfn operator==(ro NativeT<uInt8> _subject, ro NativeT<sInt8> _reference) -> bool
-	{
-		return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) == _reference.GetValue() : false;
-	}
+		// TODO: Requires optimization.
 
-	// Operator !=
+		// Comparison:
 
-	sfn operator!=(ro NativeT<sInt8> _subject, ro NativeT<uInt8> _reference) -> bool
-	{
-		return _reference.GetValue() <= SInt8Max ? _subject.GetValue() != sInt8(_reference.GetValue()) : true;
-	}
+		// Operator ==
 
-	sfn operator!=(ro NativeT<uInt8> _subject, ro NativeT<sInt8> _reference) -> bool
-	{
-		return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) != _reference.GetValue() : true;
-	}
-
-	// Operator <
-
-	sfn operator<(ro NativeT<sInt8> _subject, ro NativeT<uInt8> _reference) -> bool
-	{
-		return _reference.GetValue() <= SInt8Max ? _subject.GetValue() < sInt8(_reference.GetValue()) : true;
-	}
-
-	sfn operator<(ro NativeT<uInt8> _subject, ro NativeT<sInt8> _reference) -> bool
-	{
-		return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) < _reference.GetValue() : false;
-	}
-
-	// Operator >
-
-	sfn operator>(ro NativeT<sInt8> _subject, ro NativeT<uInt8> _reference) -> bool
-	{
-		return _reference.GetValue() <= SInt8Max ? _subject.GetValue() > sInt8(_reference.GetValue()) : false;
-	}
-
-	sfn operator>(ro NativeT<uInt8> _subject, ro NativeT<sInt8> _reference) -> bool
-	{
-		return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) > _reference.GetValue() : true;
-	}
-
-
-	// Arithmetic
-
-	// Operator +
-
-	template<typename N8_S, typename N8_R>
-	sfn operator+ (ro NativeT<N8_S> _subject, ro NativeT<N8_R> _reference) -> NativeT<sInt8>
-	{
-		ro rRef(Sign) subjSign = _subject.GetSign(), refSign = _reference.GetSign(); 
-
-		stack<sInt16> result = sInt16(_subject.GetValue()) + sInt16(_reference.GetValue());
-
-		// Note: This can't prevent overflow by providing an uInt8... (Limitation...)
-
-		if (result <= SInt8Min || result >= SInt8Max)
+		bool operator==(const NativeT<sInt8> _subject, const NativeT<uInt8> _reference)
 		{
-			return NativeT<sInt8>(sInt8(result));
+			return _reference.GetValue() <= SInt8Max ? _subject.GetValue() == sInt8(_reference.GetValue()) : false;
 		}
-		else
+		
+		bool operator==(const NativeT<uInt8> _subject, const NativeT<sInt8> _reference) 
 		{
-			throw std::overflow_error("Native8 addition overflow.");
+			return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) == _reference.GetValue() : false;
 		}
-	}
 
-	sfn operator+ (ro NativeT<uInt8> _subject, ro NativeT<uInt8> _reference) -> NativeT<uInt8>
-	{
-		stack<sInt16> result = sInt16(_subject.GetValue()) + sInt16(_reference.GetValue());
+		// Operator !=
 
-		if (result <= UInt8Max)
+		bool operator!=(const NativeT<sInt8> _subject, const NativeT<uInt8> _reference)
 		{
-			return NativeT<uInt8>(uInt8(result));
+			return _reference.GetValue() <= SInt8Max ? _subject.GetValue() != sInt8(_reference.GetValue()) : true;
 		}
-		else
+
+		bool operator!=(const NativeT<uInt8> _subject, const NativeT<sInt8> _reference)
 		{
-			throw std::overflow_error("Native8 addition overflow.");
+			return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) != _reference.GetValue() : true;
 		}
-	}
 
-	// Operator -
+		// Operator <
 
-	template<typename N8_S, typename N8_R>
-	sfn operator- (ro NativeT<N8_S> _subject, ro NativeT<N8_R> _reference) -> NativeT<sInt8>
-	{
-		ro rRef(Sign) subjSign = _subject.GetSign(), refSign = _reference.GetSign();
-
-		stack<sInt16> result = sInt16(_subject.GetValue()) - sInt16(_reference.GetValue());
-
-		if (result <= SInt8Min || result >= SInt8Max)
+		bool operator<(const NativeT<sInt8> _subject, const NativeT<uInt8> _reference)
 		{
-			return NativeT<sInt8>(sInt8(result));
+			return _reference.GetValue() <= SInt8Max ? _subject.GetValue() < sInt8(_reference.GetValue()) : true;
 		}
-		else
+
+		bool operator<(const NativeT<uInt8> _subject, const NativeT<sInt8> _reference)
 		{
-			throw std::overflow_error("Native8 subtraction overflow.");
+			return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) < _reference.GetValue() : false;
 		}
-	}
 
-	sfn operator- (ro NativeT<uInt8>_subject, ro NativeT<uInt8> _reference) -> NativeT<uInt8>
-	{
-		stack<sInt16> result = sInt16(_subject.GetValue()) - sInt16(_reference.GetValue());
+		// Operator >
 
-		if (result >= 0)
+		bool operator>(const NativeT<sInt8> _subject, const NativeT<uInt8> _reference)
 		{
-			return NativeT<uInt8>(uInt8(result));
+			return _reference.GetValue() <= SInt8Max ? _subject.GetValue() > sInt8(_reference.GetValue()) : false;
 		}
-		else
+
+		bool operator>(const NativeT<uInt8> _subject, const NativeT<sInt8> _reference)
 		{
-			throw std::overflow_error("Native8 subtraction overflow.");
+			return _subject.GetValue() <= SInt8Max ? sInt32(_subject.GetValue()) > _reference.GetValue() : true;
 		}
-	}
 
-	template<typename N8_S, typename N8_R>
-	sfn operator* (ro NativeT<N8_S> _subject, ro NativeT<N8_R> _reference) -> NativeT<sInt8>
-	{
-		ro rRef(Sign ) subjSign = _subject.GetSign(), refSign = _reference.GetSign();
 
-		stack<sInt8> result = _subject.GetValue() * _reference.GetValue();
+		// Arithmetic
 
-		if (result != sInt8(0) && result / _subject.GetValue() != _reference.GetValue())
+		// Operator +
+
+		template<typename N8_S, typename N8_R>
+		Native<sInt8> operator+ (const NativeT<N8_S> _subject, const NativeT<N8_R> _reference)
 		{
-			throw std::overflow_error("Native8 multiplication overflow.");
+			const Sign&& subjSign = _subject.GetSign(), refSign = _reference.GetSign(); 
+
+			sInt16 result = sInt16(_subject.GetValue()) + sInt16(_reference.GetValue());
+
+			// Note: This can't prevent overflow by providing an uInt8... (Limitation...)
+
+			if (result <= SInt8Min || result >= SInt8Max)
+			{
+				return NativeT<sInt8>(sInt8(result));
+			}
+			else
+			{
+				throw std::overflow_error("Native8 addition overflow.");
+			}
 		}
-		else
-		{
-			return NativeT<sInt8>(result);
-		}
-	}
 
-	sfn operator* (ro NativeT<uInt8> _subject, ro NativeT<uInt8> _reference) -> NativeT<uInt8>
-	{
-		stack<uInt8> result = _subject.GetValue() + _reference.GetValue();
+		Native<uInt8> operator+ (const NativeT<uInt8> _subject, const NativeT<uInt8> _reference)
+		{
+			sInt16 result = sInt16(_subject.GetValue()) + sInt16(_reference.GetValue());
 
-		if (result / _subject.GetValue() == _reference.GetValue())
-		{
-			return NativeT<uInt8>(uInt8(result));
+			if (result <= UInt8Max)
+			{
+				return NativeT<uInt8>(uInt8(result));
+			}
+			else
+			{
+				throw std::overflow_error("Native8 addition overflow.");
+			}
 		}
-		else
-		{
-			throw std::overflow_error("Native8 multiplication overflow.");
-		}
-	}
 
-	template<typename N8_S, typename N8_R>
-	sfn operator/ (ro NativeT<N8_S> _subject, ro NativeT<N8_R> _reference) -> NativeT<sInt8>
-	{
-		ro rRef(bool) subjSigned = IsSameType<N8_S, sInt8>() ? true : false,
-			           refSigned = IsSameType<N8_R, sInt8>() ? true : false ;
+		// Operator -
 
-		ro rRef(Sign ) subjSign = _subject.GetSign(), refSign = _reference.GetSign();
+		template<typename N8_S, typename N8_R>
+		NativeT<sInt8> operator- (const NativeT<N8_S> _subject, const NativeT<N8_R> _reference)
+		{
+			const Sign&& subjSign = _subject.GetSign(), refSign = _reference.GetSign();
 
-		if 
-		(
-			subjSigned            == true      &&
-			 refSigned            == true      &&
-			_subject  .GetValue() == SInt8Min  && 
-			_reference.GetValue() == sInt8(-1) ||
-			_reference.GetValue() == sInt8(0 )
-		)
-		{
-			throw std::overflow_error("Native8: Two's Complement division overflow or Divide by zero.");
-		}
-		else
-		{
-			return NativeT<sInt8>( sInt8(_subject.GetValue() / _reference.GetValue()) );
-		}
-	}
+			sInt16 result = sInt16(_subject.GetValue()) - sInt16(_reference.GetValue());
 
-	sfn operator/ (ro NativeT<uInt8> _subject, ro NativeT<uInt8> _reference) -> NativeT<uInt8>
-	{
-		if (_reference.GetValue() == sInt8(0))
-		{
-			throw std::logic_error("Native8: Divide by zero.");
+			if (result <= SInt8Min || result >= SInt8Max)
+			{
+				return NativeT<sInt8>(sInt8(result));
+			}
+			else
+			{
+				throw std::overflow_error("Native8 subtraction overflow.");
+			}
 		}
-		else
+
+		NativeT<uInt8> operator- (ro NativeT<uInt8>_subject, ro NativeT<uInt8> _reference)
 		{
-			return NativeT<uInt8>( _subject.GetValue() / _reference.GetValue() );
+			sInt16 result = sInt16(_subject.GetValue()) - sInt16(_reference.GetValue());
+
+			if (result >= 0)
+			{
+				return NativeT<uInt8>(uInt8(result));
+			}
+			else
+			{
+				throw std::overflow_error("Native8 subtraction overflow.");
+			}
+		}
+
+		template<typename N8_S, typename N8_R>
+		NativeT<sInt8> operator* (const NativeT<N8_S> _subject, const NativeT<N8_R> _reference)
+		{
+			const Sign&& subjSign = _subject.GetSign(), refSign = _reference.GetSign();
+
+			sInt8 result = _subject.GetValue() * _reference.GetValue();
+
+			if (result != sInt8(0) && result / _subject.GetValue() != _reference.GetValue())
+			{
+				throw std::overflow_error("Native8 multiplication overflow.");
+			}
+			else
+			{
+				return NativeT<sInt8>(result);
+			}
+		}
+
+		NativeT<uInt8> operator* (const NativeT<uInt8> _subject, const NativeT<uInt8> _reference)
+		{
+			uInt8 result = _subject.GetValue() + _reference.GetValue();
+
+			if (result / _subject.GetValue() == _reference.GetValue())
+			{
+				return NativeT<uInt8>(uInt8(result));
+			}
+			else
+			{
+				throw std::overflow_error("Native8 multiplication overflow.");
+			}
+		}
+
+		template<typename N8_S, typename N8_R>
+		Native<sInt8> operator/ (const NativeT<N8_S> _subject, const NativeT<N8_R> _reference)
+		{
+			const bool&& subjSigned = IsSameType<N8_S, sInt8>() ? true : false,
+						  refSigned = IsSameType<N8_R, sInt8>() ? true : false ;
+
+			const Sign&& subjSign = _subject.GetSign(), refSign = _reference.GetSign();
+
+			if 
+			(
+				subjSigned            == true      &&
+				 refSigned            == true      &&
+				_subject  .GetValue() == SInt8Min  && 
+				_reference.GetValue() == sInt8(-1) ||
+				_reference.GetValue() == sInt8(0 )
+			)
+			{
+				throw std::overflow_error("Native8: Two's Complement division overflow or Divide by zero.");
+			}
+			else
+			{
+				return NativeT<sInt8>( sInt8(_subject.GetValue() / _reference.GetValue()) );
+			}
+		}
+
+		Native<uInt8> operator/ (const NativeT<uInt8> _subject, const NativeT<uInt8> _reference)
+		{
+			if (_reference.GetValue() == sInt8(0))
+			{
+				throw std::logic_error("Native8: Divide by zero.");
+			}
+			else
+			{
+				return NativeT<uInt8>( _subject.GetValue() / _reference.GetValue() );
+			}
 		}
 	}
 }
-
-Context_End

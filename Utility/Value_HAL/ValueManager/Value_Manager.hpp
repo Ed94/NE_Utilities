@@ -31,89 +31,86 @@ Its also intended to be very simple.
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SAlias
+namespace NotationEngine::Utility::Value
 {
-	// C++ STL
-
-	using std::string;
-
-	// Notation Engine
-
-	using NE_U_SM::SPtr;   // TODO: Find out why I couldn't use UPtrs without a deleted function error.
-
-	// C++ STL + NE
-
-	using Owner      =      ptr <       Object          >;
-	//using VHAL_Entry = std::pair<Owner ,SPtr<Value_HAL> >;
-
-	template<typename VType> using PV_Registry         = std::map         <ro Owner, SPtr<VType> >;
-	template<typename VType> using PV_UnlistedRegistry = std::forward_list<          SPtr<VType> >;
-
-	template<typename PV_Type> using VHAL_Registry         = std::map         <ro Owner, SPtr< PV_Type > >;
-	template<typename PV_Type> using VHAL_UnlistedRegistry = std::forward_list<          SPtr< PV_Type > >;
-}
-
-SMeta
-{
-}
-
-SSource
-{
-	enum class ValuePreference
+	inline namespace Alias
 	{
-		UnsignedInteger,
-		SignedInteger  ,
-		Float          , 
-	};
+		// C++ STL
 
-	class ValueManager : public AValueManager
+		using std::string;
+
+		// Notation Engine
+
+		using NE_U_SM::SPtr;   // TODO: Find out why I couldn't use UPtrs without a deleted function error.
+
+		// C++ STL + NE
+
+		using Owner = Object*;
+		//using VHAL_Entry = std::pair<Owner ,SPtr<Value_HAL> >;
+
+		template<typename VType> using PV_Registry         = std::map         <const Owner, SPtr<VType> >;
+		template<typename VType> using PV_UnlistedRegistry = std::forward_list<             SPtr<VType> >;
+
+		template<typename PV_Type> using VHAL_Registry         = std::map         <const Owner, SPtr< PV_Type > >;
+		template<typename PV_Type> using VHAL_UnlistedRegistry = std::forward_list<             SPtr< PV_Type > >;
+	}
+
+	inline namespace Meta
 	{
-	public:
-		 ValueManager(void);
-		~ValueManager(void);
+	}
 
-		sfn Zero(ro Owner ObjectRequesting, ValuePreference PerferredPrimitive                    ) -> ptr<AValue_HAL>;
-		sfn One (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive                    ) -> ptr<AValue_HAL>;
-		sfn I64 (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive, uInt64 I64ToAssign) -> ptr<AValue_HAL>;
+	inline namespace Source
+	{
+		enum class ValuePreference
+		{
+			UnsignedInteger,
+			SignedInteger  ,
+			Float          , 
+		};
 
-		//sfn ChangeOwner(ro ptr<Object> ObjectToChangeOwner)
+		class ValueManager : public AValueManager
+		{
+		public:
+			 ValueManager(void);
+			~ValueManager(void);
 
-		sfn ClearPool(void) -> void;
+			AValue_HAL* Zero(const Owner ObjectRequesting, ValuePreference PerferredPrimitive                    );
+			AValue_HAL* One (const Owner ObjectRequesting, ValuePreference PerferredPrimitive                    );
+			AValue_HAL* I64 (const Owner ObjectRequesting, ValuePreference PerferredPrimitive, uInt64 I64ToAssign);
 
-		sfn Disown(ro ptr<Object> ObjectToDelistValue) -> void;
+			//sfn ChangeOwner(ro ptr<Object> ObjectToChangeOwner)
 
-		sfn Request_VHAL(ro Owner ObjectRequesting,           ValuePreference  PerferredPrimitive) -> ptr<AValue_HAL>;
-		sfn Request_VHAL(ro Owner ObjectRequesting, ro ptr<ro AValue_HAL     > ValueDesired      ) -> ptr<AValue_HAL>;
+			void ClearPool(void);
 
-		implem sfn Str(void) ro -> string;
+			void Disown(Object* const ObjectToDelistValue);
 
-		sfn TransferOwner(ro Owner ObjectToDisown, ro Owner NewOwner) -> ptr<AValue_HAL>;
+			AValue_HAL* Request_VHAL(const Owner ObjectRequesting,       ValuePreference        PerferredPrimitive);
+			AValue_HAL* Request_VHAL(const Owner ObjectRequesting, const AValue_HAL*      const ValueDesired      );
 
-	private:
-		template<typename Entry>
-		sfn Contains(Ref(Entry) _entry) -> bool;
+			virtual string Str(void) const;
 
-		VHAL_Registry< NativeT<float64> > F64_Allocations;
+			AValue_HAL* TransferOwner(const Owner ObjectToDisown, const Owner NewOwner);
 
-		VHAL_UnlistedRegistry< NativeT<float64> > F64_openAllocations;
-	};
+		private:
+			template<typename Entry>
+			bool Contains(Entry& _entry);
+
+			VHAL_Registry< NativeT<float64> > F64_Allocations;
+
+			VHAL_UnlistedRegistry< NativeT<float64> > F64_openAllocations;
+		};
+	}
 }
-
-Context_End
-
 
 
 #ifdef __Use_Static_ValueHAL_Manager__
 
-	Context(NotationEngine::Utility::Value)
-
-	SSource
+	namespace NotationEngine::Utility::Value
 	{
-		eGlobal data<ValueManager> VHAL_Mngr;   // Value Manager global instance.
+		inline namespace
+		{
+			extern ValueManager VHAL_Mngr;   // Value Manager global instance.
+		}
 	}
-
-	Context_End
 
 #endif

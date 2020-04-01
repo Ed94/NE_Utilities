@@ -21,28 +21,27 @@ Note: Currently not used.
 
 
 
-Context(NotationEngine::Utility::Value)
-
-SAlias
+namespace NotationEngine::Utility::Value
 {
-	// C++ STL
-
-	using std::string;
-	
-	// Notation Engine
-
-	using NE_M::Object;
-}
-
-SSource
-{
-	class AValueManager
+	inline namespace Alias
 	{
-	public:
-		virtual ~AValueManager(void) = NULL;
+		// C++ STL
 
-		virtual sfn Str(void) ro -> string = NULL;
-	};
+		using std::string;
+		
+		// Notation Engine
+
+		using NE_M::Object;
+	}
+
+	inline namespace Source
+	{
+		class AValueManager
+		{
+		public:
+			virtual ~AValueManager(void) = NULL;
+
+			virtual string Str(void) const = NULL;
+		};
+	}
 }
-
-Context_End

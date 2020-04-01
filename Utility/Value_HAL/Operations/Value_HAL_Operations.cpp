@@ -6,110 +6,110 @@
 #include "EngineConfig.hpp"
 
 
-Context(NotationEngine::Utility::Value)
 
-SAlias
+namespace NotationEngine::Utility::Value
 {
-	using NE_Cfg::GetValueHAL_Option;
-
-	using NE_Cfg::ValueHAL_Mode;
-
-	using std::move;
-}
-
-SSource
-{
-	sfn IsEqual(ro ptr<ro AValue_HAL> _subject, ro ptr<ro AValue_HAL> _reference) -> bool
+	inline namespace Alias
 	{
-		if (_subject->GetSign() == _reference->GetSign())
+		using NE_Cfg::GetValueHAL_Option;
+
+		using NE_Cfg::ValueHAL_Mode;
+
+		using std::move;
+	}
+
+	inline namespace Source
+	{
+		bool IsEqual(const AValue_HAL* const _subject, const AValue_HAL* const _reference)
+		{
+			if (_subject->GetSign() == _reference->GetSign())
+			{
+				switch (GetValueHAL_Option())
+				{
+					case ValueHAL_Mode::Force_FloatingPoint64:
+					{
+						return SCast<const  NativeT<float64> >(_subject) == SCast<const  NativeT<float64> >(_reference);
+					}
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		bool IsGreater(const AValue_HAL* const _subject, const AValue_HAL* const _reference)
 		{
 			switch (GetValueHAL_Option())
 			{
 				case ValueHAL_Mode::Force_FloatingPoint64:
 				{
-					return SCast<ro  NativeT<float64> >(_subject) == SCast<ro  NativeT<float64> >(_reference);
+					return SCast<const NativeT<float64> >(_subject) > SCast<const NativeT<float64> >(_reference);
+				}
+				default:
+				{
+					throw std::logic_error("Not Implemented");
 				}
 			}
 		}
-		else
-		{
-			return false;
-		}
-	}
 
-	sfn IsGreater(ro ptr<ro AValue_HAL> _subject, ro ptr<ro AValue_HAL> _reference) -> bool
-	{
-		switch (GetValueHAL_Option())
+		bool IsLesser(const AValue_HAL* const _subject, const AValue_HAL* _reference) 
 		{
-			case ValueHAL_Mode::Force_FloatingPoint64:
+			switch (GetValueHAL_Option())
 			{
-				return SCast<ro NativeT<float64> >(_subject) > SCast<ro NativeT<float64> >(_reference);
-			}
-			default:
-			{
-				throw std::logic_error("Not Implemented");
+				case ValueHAL_Mode::Force_FloatingPoint64:
+				{
+					return SCast<const NativeT<float64> >(_subject) < SCast<const NativeT<float64> >(_reference);
+				}
+				default:
+				{
+					throw std::logic_error("Not Implemented");
+				}
 			}
 		}
-	}
 
-	sfn IsLesser(ro ptr<ro AValue_HAL> _subject, ro ptr<ro AValue_HAL> _reference) -> bool
-	{
-		switch (GetValueHAL_Option())
+		// This add is implemented using assignment add. (Subject will be assigned the result)
+		void Add(AValue_HAL* const _subject, const AValue_HAL* const _reference)
 		{
-			case ValueHAL_Mode::Force_FloatingPoint64:
+			switch (GetValueHAL_Option())
 			{
-				return SCast<ro NativeT<float64> >(_subject) < SCast<ro NativeT<float64> >(_reference);
-			}
-			default:
-			{
-				throw std::logic_error("Not Implemented");
+				case ValueHAL_Mode::Force_FloatingPoint64:
+				{
+					SCast< NativeT<float64> >(_subject)->SetValue
+					(
+						SCast<      NativeT<float64> >(_subject  )->GetValue_Stack() + 
+						SCast<const NativeT<float64> >(_reference)->GetValue_Stack()
+					);
+
+					return;
+				}
+				default:
+				{
+					throw std::logic_error("Not Implemented");
+				}
 			}
 		}
-	}
 
-	// This add is implemented using assignment add. (Subject will be assigned the result)
-	sfn Add(ro ptr<AValue_HAL> _subject, ro ptr<ro AValue_HAL> _reference) -> void
-	{
-		switch (GetValueHAL_Option())
+		// This subtract is implemented using assignment subtract. (Subject will be assigned the result)
+		void Subtract(AValue_HAL* const _subject, const AValue_HAL* const _reference)
 		{
-			case ValueHAL_Mode::Force_FloatingPoint64:
+			switch (GetValueHAL_Option())
 			{
-				SCast< NativeT<float64> >(_subject)->SetValue
-				(
-					SCast<   NativeT<float64> >(_subject  )->GetValue_Stack() + 
-					SCast<ro NativeT<float64> >(_reference)->GetValue_Stack()
-				);
+				case ValueHAL_Mode::Force_FloatingPoint64:
+				{
+					SCast< NativeT<float64> >(_subject)->SetValue
+					(
+						SCast<      NativeT<float64> >(_subject  )->GetValue_Stack() -
+						SCast<const NativeT<float64> >(_reference)->GetValue_Stack()
+					);
 
-				return;
-			}
-			default:
-			{
-				throw std::logic_error("Not Implemented");
-			}
-		}
-	}
-
-	// This subtract is implemented using assignment subtract. (Subject will be assigned the result)
-	sfn Subtract(ro ptr<AValue_HAL> _subject, ro ptr<ro AValue_HAL> _reference) -> void
-	{
-		switch (GetValueHAL_Option())
-		{
-			case ValueHAL_Mode::Force_FloatingPoint64:
-			{
-				SCast< NativeT<float64> >(_subject)->SetValue
-				(
-					SCast<   NativeT<float64> >(_subject  )->GetValue_Stack() -
-					SCast<ro NativeT<float64> >(_reference)->GetValue_Stack()
-				);
-
-				return;
-			}
-			default:
-			{
-				throw std::logic_error("Not Implemented");
+					return;
+				}
+				default:
+				{
+					throw std::logic_error("Not Implemented");
+				}
 			}
 		}
 	}
 }
-	
-Context_End
