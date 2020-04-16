@@ -24,25 +24,25 @@ SSource
 	template<typename NType_S, typename NType_R>
 	sfn operator== (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
 	{
-		return _subject.GetValue() == _reference.GetValue();
+		return _subject.GetValue_Stack() == _reference.GetValue_Stack();
 	}
 
 	template<typename NType_S, typename NType_R>
 	sfn operator!= (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
 	{
-		return _subject.GetValue() != _reference.GetValue();
+		return _subject.GetValue_Stack() != _reference.GetValue_Stack();
 	}
 
 	template<typename NType_S, typename NType_R>
 	sfn operator< (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
 	{
-		return _subject.GetValue() < _reference.GetValue();
+		return _subject.GetValue_Stack() < _reference.GetValue_Stack();
 	}
 
 	template<typename NType_S, typename NType_R>
 	sfn operator> (ro NativeT<NType_S> _subject, ro NativeT<NType_R> _reference) -> bool
 	{
-		return _subject.GetValue() > _reference.GetValue();
+		return _subject.GetValue_Stack() > _reference.GetValue_Stack();
 	}
 }
 

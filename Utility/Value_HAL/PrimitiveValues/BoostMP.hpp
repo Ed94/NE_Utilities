@@ -36,6 +36,8 @@ SSource
 
 		implem sfn Str(void) ro -> ro string final;
 
+		implem sfn SetSign(ro Sign SignToSet) -> void;
+
 		implem sfn SetValue(ro Ref(MP_Type) ValueToSet) -> void final;
 
 		sfn operator=(ro Ref(BoostMP<MP_Type>) MP_ToAssign) ->     BoostMP<MP_Type> ;

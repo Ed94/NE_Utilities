@@ -84,6 +84,10 @@ SSource
 		else if (typeID == BoostMP_TypeID<uInt256  >) return ValueType::uInt256 ;
 		else if (typeID == BoostMP_TypeID<sInt256  >) return ValueType::sInt256 ;
 		else if (typeID == BoostMP_TypeID<Float_P50>) return ValueType::FloatP50;
+		else
+		{
+			throw std::logic_error("Did not get a proper case.");
+		}
 	}
 }
 

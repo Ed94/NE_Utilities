@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2019 Jonathan Müller <jonathanmueller.dev@gmail.com>
+// Copyright (C) 2016-2020 Jonathan Müller <jonathanmueller.dev@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level directory of this distribution.
 
@@ -237,14 +237,15 @@ public:
     }
 };
 
-#if TYPE_SAFE_ARITHMETIC_UB
+#if TYPE_SAFE_ARITHMETIC_POLICY == 1
 /// The default `ArithmeticPolicy`.
 ///
-/// It depends on the [TYPE_SAFE_ARITHMETIC_UB]() macro,
-/// and is either [ts::undefined_behavior_arithmetic]() or [ts::default_arithmetic]().
-/// \exclude target
-/// \module types
+/// It depends on the [TYPE_SAFE_ARITHMETIC_POLICY]() macro,
+/// and is either [ts::undefined_behavior_arithmetic](), [ts::checked_arithmetic](), or
+/// [ts::default_arithmetic](). \exclude target \module types
 using arithmetic_policy_default = undefined_behavior_arithmetic;
+#elif TYPE_SAFE_ARITHMETIC_POLICY == 2
+using arithmetic_policy_default = checked_arithmetic;
 #else
 using arithmetic_policy_default = default_arithmetic;
 #endif

@@ -375,7 +375,7 @@ Context_End
 //#endif
 
 
-#ifdef __Use_Static_ValueHAL_Manager__
+#ifdef __Use_GLOBAL_ValueHAL_Manager__
 
 Context(NotationEngine::Utility::Value)
 

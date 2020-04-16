@@ -37,6 +37,8 @@ SSource
 
 		implem sfn Str(void) ro -> ro string = NULL;
 
+		implem sfn SetSign(ro Sign SignToSet) -> void = NULL;
+
 		virtual sfn SetValue(ro Ref(MP_Type) ValueToSet) -> void = NULL;
 	};
 }

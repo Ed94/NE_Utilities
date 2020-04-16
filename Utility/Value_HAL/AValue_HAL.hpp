@@ -79,6 +79,8 @@ Context_End
 
 			implem sfn Str(void) ro -> ro string = NULL;
 
+			virtual sfn SetSign(ro Sign SignToSet) -> void = NULL;
+
 			virtual sfn SetZero(void) -> void = NULL;
 
 			virtual sfn SetValue(ro        uInt64      ValueToSet) -> void = NULL;

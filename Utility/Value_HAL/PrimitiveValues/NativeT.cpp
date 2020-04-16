@@ -45,7 +45,6 @@ SAlias
 
 SMeta
 {
-	
 }
 
 SSource 
@@ -55,7 +54,12 @@ SSource
 	{}
 
 	template<typename NType>
-	NativeT<NType>::NativeT() : nValue()
+	NativeT<NType>::NativeT() : 
+		#ifdef __USE_TypeSafe__
+			nValue(decltype(nValue.get())(0))
+		#else
+			nValue(0)
+		#endif
 	{}
 
 	//template<typename NType>
@@ -68,17 +72,35 @@ SSource
 		nValue(_nativeT.nValue)
 	{}
 
-	template<typename NType>
-	NativeT<NType>::NativeT(rRef(NType) _nType) noexcept
-	{
-		nValue = move(_nType);
-	}
+	#ifdef __USE_TypeSafe__
 
-	template<typename NType>
-	NativeT<NType>::NativeT(rRef(NativeT<NType>) _nType) noexcept
-	{
-		dref(this) = move(_nType);
-	}
+		template<typename NType>
+		NativeT<NType>::NativeT(rRef(NType) _nType) : nValue(decltype(nValue.get())(0))
+		{
+			nValue = move(_nType);
+		}
+
+		template<typename NType>
+		NativeT<NType>::NativeT(rRef(NativeT<NType>) _nType) : nValue(decltype(nValue.get())(0))
+		{
+			dref(this) = move(_nType);
+		}
+
+	#else
+
+		template<typename NType>
+		NativeT<NType>::NativeT(rRef(NType) _nType) noexcept
+		{
+			nValue = move(_nType);
+		}
+
+		template<typename NType>
+		NativeT<NType>::NativeT(rRef(NativeT<NType>) _nType) noexcept
+		{
+			dref(this) = move(_nType);
+		}
+
+	#endif
 
 	template<typename NType>
 	NativeT<NType>::~NativeT()
@@ -87,7 +109,11 @@ SSource
 	template<typename NType>
 	sfn NativeT<NType>::GetSign() ro -> ro Sign
 	{
-		return sign();
+		#ifdef __USE_TypeSafe__
+			return IsInt<NType>() ? unsafe::Int::Signum(nValue.get()) : unsafe::Float::Signum(nValue.get());
+		#else
+			return sign();
+		#endif
 	}
 
 	template<typename NType>
@@ -105,7 +131,17 @@ SSource
 	template<typename NType>
 	sfn NativeT<NType>::Reinitialize() -> void
 	{
-		nValue = NType();
+		#ifdef __USE_TypeSafe__
+
+			using RawValueType = decltype(nValue.get());
+
+			nValue = NType(RawValueType(0));
+
+		#else
+
+			nValue = 0
+
+		#endif
 
 		return;
 	}
@@ -121,27 +157,91 @@ SSource
 	}
 
 	template<typename NType>
+	sfn NativeT<NType>::SetSign(ro Sign _sign) -> void
+	{
+		#ifdef __USE_TypeSafe__
+
+			if (GetSign() == _sign) return;
+
+			if (IsSigned<NType>() == true)
+			{
+				nValue =
+					NType
+					(
+						decltype(nValue.get())
+						(
+							-(nValue.get())
+							)
+					);
+			}
+			else
+			{
+				throw std::logic_error("NativeT: Attempted to set the sign of an unsigned type.");
+	}
+
+		#else
+
+			if (sign() == _sign) return;
+
+			if (IsSigned<NType>() == true)
+			{
+				nValue = -nValue;
+			}
+			else
+			{
+				throw std::logic_error("NativeT: Attempted to set the sign of an unsigned type.");
+			}
+
+		#endif
+	}
+
+	template<typename NType>
 	sfn NativeT<NType>::SetZero() -> void
 	{
-		nValue = NType(0);
+		#ifdef __USE_TypeSafe__
+			nValue = decltype(nValue.get())(0);
+		#else
+			nValue = 0;
+		#endif
 	}
 
 	// TODO: Needs safety check.
 	template<typename NType>
 	sfn NativeT<NType>::SetValue(ro uInt64 _value) -> void
 	{
-		if (IsSameType<NType, uInt64>() || IsFloat<NType>())
-		{
-			nValue = NType(_value);
-		}
-		else if (_value <= uInt64(NumLimits<NType>().max()))
-		{
-			nValue = NType(_value);
-		}
-		else
-		{
-			throw std::logic_error(""); //  "Attempted to assign an unsigned integer value to : " << typeid(NType).name()
-		}
+		#ifdef __USE_TypeSafe__
+
+			using RawValueType = decltype(nValue.get());
+
+			if (IsSameType<NType, uInt64>() || IsFloat<NType>())
+			{
+				nValue = RawValueType(_value.get());
+			}
+			else if (_value <= unsafe::uInt64(NumLimits<RawValueType>().max()))
+			{
+				nValue = RawValueType(_value.get());
+			}
+			else
+			{
+				throw std::logic_error(""); //  "Attempted to assign an unsigned integer value to : " << typeid(NType).name()
+			}
+
+		#else
+
+			if (IsSameType<NType, uInt64>() || IsFloat<NType>())
+			{
+				nValue = _value;
+			}
+			else if (_value <= uInt64(NumLimits<NType>().max()))
+			{
+				nValue = _value;
+			}
+			else
+			{
+				throw std::logic_error(""); //  "Attempted to assign an unsigned integer value to : " << typeid(NType).name()
+			}
+
+		#endif
 	}
 
 	//// TODO: Needs safety check.
@@ -165,7 +265,17 @@ SSource
 		{
 			case ValueHAL_Mode::Force_FloatingPoint64:
 			{
-				nValue = NType(SCast<ro NativeT<float64> >(_value)->GetValue_Stack());
+				#ifndef __USE_TypeSafe__
+					nValue = NType(SCast<ro NativeT<float64> >(_value)->GetValue_Stack());
+				#else
+					using RawValueType = decltype(nValue.get());
+
+					nValue = 
+						RawValueType
+						(
+							SCast<ro NativeT<float64> >(_value)->GetValue_Stack().get()
+						);
+				#endif
 
 				return;
 			}
@@ -241,7 +351,9 @@ SSource
 	template class NativeT<uInt64 >;
 	template class NativeT<float64>;
 
-	template class NativeT<floatEP>;   // Note: Will just be a float64 in MSVC
+	#ifndef __USE_TypeSafe__
+		template class NativeT<floatEP>;   // Note: Will just be a float64 in MSVC
+	#endif
 }
 
 Context_End

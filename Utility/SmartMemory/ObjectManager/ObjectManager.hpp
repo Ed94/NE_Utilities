@@ -119,7 +119,7 @@ SSource
 
 Context_End
 
-#ifdef __Use_Static_Object_Manager__
+#ifdef __Use_Global_Object_Manager__
 
 	Context(NotationEngine::Utility::SmartMemory)
 

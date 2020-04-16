@@ -65,6 +65,8 @@ SSource
 
 		implem sfn Str(void) ro -> ro string = NULL;
 
+		implem sfn SetSign(ro Sign SignToSet) -> void = NULL;
+
 		implem sfn SetZero(void) -> void = NULL;
 
 		implem sfn SetValue(ro        uInt64      ValueToSet) -> void = NULL;

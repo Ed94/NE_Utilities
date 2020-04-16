@@ -97,6 +97,14 @@ SSource
 	}
 
 	template<typename MP_Type>
+	sfn BoostMP<MP_Type>::SetSign(ro Sign _sign) -> void
+	{
+		if (sign() == _sign) return;
+
+		mValue *= -1;
+	}
+
+	template<typename MP_Type>
 	sfn BoostMP<MP_Type>::SetValue(ro Ref(MP_Type) _mpValue) -> void
 	{
 		mValue = _mpValue;

@@ -20,93 +20,176 @@ namespace msl
 		//core logic to determine method to check multiplication
 		enum MultiplicationState
 		{
-			MultiplicationState_CastInt = 0,  // One or both signed, smaller than 32-bit
-			MultiplicationState_CastInt64,    // One or both signed, smaller than 64-bit
-			MultiplicationState_CastUint,     // Both are unsigned, smaller than 32-bit
-			MultiplicationState_CastUint64,   // Both are unsigned, both 32-bit or smaller
-			MultiplicationState_Uint64Uint,   // Both are unsigned, lhs 64-bit, rhs 32-bit or smaller
-			MultiplicationState_Uint64Uint64, // Both are unsigned int64
-			MultiplicationState_Uint64Int,    // lhs is unsigned int64, rhs int32
-			MultiplicationState_Uint64Int64,  // lhs is unsigned int64, rhs signed int64
-			MultiplicationState_UintUint64,   // Both are unsigned, lhs 32-bit or smaller, rhs 64-bit
-			MultiplicationState_UintInt64,    // lhs unsigned 32-bit or less, rhs int64
-			MultiplicationState_Int64Uint,    // lhs int64, rhs unsigned int32
-			MultiplicationState_Int64Int64,   // lhs int64, rhs int64
-			MultiplicationState_Int64Int,     // lhs int64, rhs int32
-			MultiplicationState_IntUint64,    // lhs int, rhs unsigned int64
-			MultiplicationState_IntInt64,     // lhs int, rhs int64
-			MultiplicationState_Int64Uint64,  // lhs int64, rhs uint64
+			MultiplicationState_CastInt   = 0,   // One or both signed, smaller than 32-bit
+			MultiplicationState_CastInt64    ,   // One or both signed, smaller than 64-bit
+			MultiplicationState_CastUint     ,   // Both are unsigned, smaller than 32-bit
+			MultiplicationState_CastUint64   ,   // Both are unsigned, both 32-bit or smaller
+			MultiplicationState_Uint64Uint   ,   // Both are unsigned, lhs 64-bit, rhs 32-bit or smaller
+			MultiplicationState_Uint64Uint64 ,   // Both are unsigned int64
+			MultiplicationState_Uint64Int    ,   // lhs is unsigned int64, rhs int32
+			MultiplicationState_Uint64Int64  ,   // lhs is unsigned int64, rhs signed int64
+			MultiplicationState_UintUint64   ,   // Both are unsigned, lhs 32-bit or smaller, rhs 64-bit
+			MultiplicationState_UintInt64    ,   // lhs unsigned 32-bit or less, rhs int64
+			MultiplicationState_Int64Uint    ,   // lhs int64, rhs unsigned int32
+			MultiplicationState_Int64Int64   ,   // lhs int64, rhs int64
+			MultiplicationState_Int64Int     ,   // lhs int64, rhs int32
+			MultiplicationState_IntUint64    ,   // lhs int, rhs unsigned int64
+			MultiplicationState_IntInt64     ,   // lhs int, rhs int64
+			MultiplicationState_Int64Uint64  ,   // lhs int64, rhs uint64
 			MultiplicationState_Error
 		};
 
-		template < typename T, typename U >
+		template < typename Type_S, typename Type_R >
 		class MultiplicationMethod
 		{
 		public:
 			enum
 			{
 				// unsigned-unsigned
-				method = (IntRegion< T, U >::IntZone_UintLT32_UintLT32 ? MultiplicationState_CastUint :
-				(IntRegion< T, U >::IntZone_Uint32_UintLT64 ||
-					IntRegion< T, U >::IntZone_UintLT32_Uint32) ? MultiplicationState_CastUint64 :
-					safeint_internal::type_compare< T, U >::isBothUnsigned &&
-					safeint_internal::int_traits< T >::isUint64 && safeint_internal::int_traits< U >::isUint64 ? MultiplicationState_Uint64Uint64 :
-					(IntRegion< T, U >::IntZone_Uint64_Uint) ? MultiplicationState_Uint64Uint :
-					(IntRegion< T, U >::IntZone_UintLT64_Uint64) ? MultiplicationState_UintUint64 :
-					// unsigned-signed
-					(IntRegion< T, U >::IntZone_UintLT32_IntLT32) ? MultiplicationState_CastInt :
-					(IntRegion< T, U >::IntZone_Uint32_IntLT64 ||
-						IntRegion< T, U >::IntZone_UintLT32_Int32) ? MultiplicationState_CastInt64 :
-						(IntRegion< T, U >::IntZone_Uint64_Int) ? MultiplicationState_Uint64Int :
-					(IntRegion< T, U >::IntZone_UintLT64_Int64) ? MultiplicationState_UintInt64 :
-					(IntRegion< T, U >::IntZone_Uint64_Int64) ? MultiplicationState_Uint64Int64 :
-					// signed-signed
-					(IntRegion< T, U >::IntZone_IntLT32_IntLT32) ? MultiplicationState_CastInt :
-					(IntRegion< T, U >::IntZone_Int32_IntLT64 ||
-						IntRegion< T, U >::IntZone_IntLT32_Int32) ? MultiplicationState_CastInt64 :
-						(IntRegion< T, U >::IntZone_Int64_Int64) ? MultiplicationState_Int64Int64 :
-					(IntRegion< T, U >::IntZone_Int64_Int) ? MultiplicationState_Int64Int :
-					(IntRegion< T, U >::IntZone_IntLT64_Int64) ? MultiplicationState_IntInt64 :
+				method = 
+				(
+					IntRegion< Type_S, Type_R >::IntZone_UintLT32_UintLT32 ? 
+
+						MultiplicationState_CastUint :
+					(
+						IntRegion< Type_S, Type_R >::IntZone_Uint32_UintLT64 ||
+						IntRegion< Type_S, Type_R >::IntZone_UintLT32_Uint32
+					) ?
+
+						MultiplicationState_CastUint64 :
+
+					safeint_internal::type_compare< Type_S, Type_R >::isBothUnsigned &&
+					safeint_internal::int_traits  < Type_S         >::isUint64       && 
+					safeint_internal::int_traits  < Type_R         >::isUint64          ? 
+						
+						MultiplicationState_Uint64Uint64 :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Uint64_Uint) ?
+
+						MultiplicationState_Uint64Uint :
+
+					(IntRegion< Type_S, Type_R >::IntZone_UintLT64_Uint64) ? 
+					
+						MultiplicationState_UintUint64 :
+
+					// Unsigned-Signed
+
+					(IntRegion< Type_S, Type_R >::IntZone_UintLT32_IntLT32) ? 
+					
+						MultiplicationState_CastInt :
+
+					(
+						IntRegion< Type_S, Type_R >::IntZone_Uint32_IntLT64 ||
+						IntRegion< Type_S, Type_R >::IntZone_UintLT32_Int32
+					) ?
+					
+					MultiplicationState_CastInt64 :
+							
+					(IntRegion< Type_S, Type_R >::IntZone_Uint64_Int) ? 
+						
+						MultiplicationState_Uint64Int :
+							
+					(IntRegion< Type_S, Type_R >::IntZone_UintLT64_Int64) ?
+					
+						MultiplicationState_UintInt64 :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Uint64_Int64) ? 
+					
+						MultiplicationState_Uint64Int64 :
+
+					// Signed-Signed
+
+					(IntRegion< Type_S, Type_R >::IntZone_IntLT32_IntLT32) ? 
+					
+						MultiplicationState_CastInt :
+
+					(
+						IntRegion< Type_S, Type_R >::IntZone_Int32_IntLT64 ||
+						IntRegion< Type_S, Type_R >::IntZone_IntLT32_Int32
+					) ? 
+					
+						MultiplicationState_CastInt64 :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Int64_Int64) ? 
+					
+					MultiplicationState_Int64Int64 :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Int64_Int) ? 
+					
+					MultiplicationState_Int64Int :
+
+					(IntRegion< Type_S, Type_R >::IntZone_IntLT64_Int64) ? 
+					
+					MultiplicationState_IntInt64 :
+
 					// signed-unsigned
-					(IntRegion< T, U >::IntZone_IntLT32_UintLT32) ? MultiplicationState_CastInt :
-					(IntRegion< T, U >::IntZone_Int32_UintLT32 ||
-						IntRegion< T, U >::IntZone_IntLT64_Uint32) ? MultiplicationState_CastInt64 :
-						(IntRegion< T, U >::IntZone_Int64_UintLT64) ? MultiplicationState_Int64Uint :
-					(IntRegion< T, U >::IntZone_Int_Uint64) ? MultiplicationState_IntUint64 :
-					(IntRegion< T, U >::IntZone_Int64_Uint64 ? MultiplicationState_Int64Uint64 :
-						MultiplicationState_Error))
+					(IntRegion< Type_S, Type_R >::IntZone_IntLT32_UintLT32) ?
+					
+					MultiplicationState_CastInt :
+
+					(
+						IntRegion< Type_S, Type_R >::IntZone_Int32_UintLT32 ||
+						IntRegion< Type_S, Type_R >::IntZone_IntLT64_Uint32
+					) ? 
+					
+					MultiplicationState_CastInt64 :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Int64_UintLT64) ? 
+					
+					MultiplicationState_Int64Uint :
+
+					(IntRegion< Type_S, Type_R >::IntZone_Int_Uint64) ? 
+					
+					MultiplicationState_IntUint64 :
+
+					(
+						IntRegion< Type_S, Type_R >::IntZone_Int64_Uint64 ? 
+						
+						MultiplicationState_Int64Uint64 :
+
+						MultiplicationState_Error
+					)
+				)
 			};
 		};
 
-		template <typename T, typename U, int state> class MultiplicationHelper;
+		// Base Helper for Multiplication.
+		template <typename Type_S, typename Type_R, int state> class MultiplicationHelper;
 
-		template < typename T, typename U > class MultiplicationHelper< T, U, MultiplicationState_CastInt>
+		// Int
+		template < typename Type_S, typename Type_R > class MultiplicationHelper< Type_S, Type_R, MultiplicationState_CastInt>
 		{
 		public:
-			//accepts signed, both less than 32-bit
-			_CONSTEXPR14 static bool Multiply(const T& t, const U& u, T& ret) SAFEINT_NOTHROW
+			//Accepts signed, both less than 32-bit
+			_CONSTEXPR14 static bool Multiply(const Type_S& _subject, const Type_R& _reference, Type_S& _return) SAFEINT_NOTHROW
 			{
-				int tmp = t * u;
+				int result = _subject * _reference;
 
-				if (tmp > std::numeric_limits<T>::max() || tmp < std::numeric_limits<T>::min())
+				if (result > std::numeric_limits<Type_S>::max() || result < std::numeric_limits<Type_S>::min())
+				{
 					return false;
+				}
 
-				ret = (T)tmp;
+				_return = (Type_S)tmp;
+
 				return true;
 			}
 
-			template < typename E >
-			_CONSTEXPR14 static void MultiplyThrow(const T& t, const U& u, T& ret) SAFEINT_CPP_THROW
+			template < typename Exception >
+			_CONSTEXPR14 static void MultiplyThrow(const Type_S& _subject, const Type_R& _reference, Type_S& _returnVal) SAFEINT_CPP_THROW
 			{
-				int tmp = t * u;
+				int result = _subject * _reference;
 
-				if (tmp > std::numeric_limits<T>::max() || tmp < std::numeric_limits<T>::min())
-					E::SafeIntOnOverflow();
+				if (result > std::numeric_limits<T>::max() || result < std::numeric_limits<T>::min())
+				{
+					Exception::SafeIntOnOverflow();
+				}
 
-				ret = (T)tmp;
+				_returnVal = (Type_S)tmp;
 			}
 		};
 
+		// UInt
 		template < typename T, typename U > class MultiplicationHelper< T, U, MultiplicationState_CastUint >
 		{
 		public:

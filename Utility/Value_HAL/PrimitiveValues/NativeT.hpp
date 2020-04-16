@@ -19,6 +19,11 @@ Defines the Native-T type.
 
 Context(NotationEngine::Utility::Value)
 
+SAlias
+{
+	using NE_U_R::IsSigned;
+}
+
 SSource
 {
 	template<typename NType>
@@ -31,13 +36,22 @@ SSource
 
 		NativeT(ro Ref(NativeT<NType>) NativeT_ToAssign);
 
-		NativeT(rRef(NType) NativeToMove) noexcept;
+		#ifndef __USE_TypeSafe__
+			NativeT(rRef(NType) NativeToMove) noexcept;
 
-		NativeT(rRef(NativeT<NType>) NativeT_ToMove) noexcept;
+			NativeT(rRef(NativeT<NType>) NativeT_ToMove) noexcept;
+		#else
+
+			NativeT(rRef(NType) NativeToMove);
+
+			NativeT(rRef(NativeT<NType>) NativeT_ToMove);
+
+		#endif
 
 		~NativeT(void);
 
-		implem sfn GetSign (void) ro -> ro     Sign   final;
+		implem sfn GetSign (void) ro -> ro Sign final;
+		
 		implem sfn GetValue(void) ro -> ro Ref(NType) final;
 
 		implem sfn GetTypeID(void) ro -> ro Ref(TypeData) final;
@@ -45,6 +59,8 @@ SSource
 		implem sfn Reinitialize(void) -> void final;
 
 		implem sfn Str(void) ro -> ro string final;
+
+		implem sfn SetSign(ro Sign SignToSet) -> void;
 
 		implem sfn SetZero(void) -> void final;
 
@@ -67,10 +83,13 @@ SSource
 		sfn SetValue_Stack(ro NType ValueToSet) -> void;
 
 	private:
-		constant sfn sign(void) ro -> ro Sign
-		{
-			return IsInt<NType>() ? Int::Signum(nValue) : Float::Signum(nValue);
-		}
+
+		#ifndef __USE_TypeSafe__
+			constant sfn sign(void) ro -> ro Sign
+			{
+				return IsInt<NType>() ? Int::Signum(nValue) : Float::Signum(nValue);
+			}
+		#endif
 
 		NType nValue;
 	};

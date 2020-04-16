@@ -99,19 +99,132 @@ SSource
 
 		VHAL_UnlistedRegistry< NativeT<float64> > F64_openAllocations;
 	};
+
+	// For when non global instances are used, proxies interfaces can be defined to be used by the value holding classes.
+	class ProxyVManager 
+	{
+	public:
+		ProxyVManager(rRef(ValueManager) _vManager) : globalInstance(_vManager)
+		{}
+
+		sfn Zero(ro Owner ObjectRequesting, ValuePreference PerferredPrimitive) -> ptr<AValue_HAL>
+		{
+			return globalInstance.Zero(ObjectRequesting, PerferredPrimitive);
+		}
+
+		sfn One (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive) -> ptr<AValue_HAL>
+		{
+			return globalInstance.One(ObjectRequesting, PerferredPrimitive);
+		}
+
+		sfn I64 (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive, uInt64 I64ToAssign) -> ptr<AValue_HAL>
+		{
+			return globalInstance.I64(ObjectRequesting, PerferredPrimitive, I64ToAssign);
+		}
+
+		//sfn ChangeOwner(ro ptr<Object> ObjectToChangeOwner)
+
+		sfn ClearPool(void) -> void
+		{
+			globalInstance.ClearPool();
+		}
+
+		sfn Disown(ro ptr<Object> ObjectToDelistValue) -> void
+		{
+			globalInstance.Disown(ObjectToDelistValue);
+		}
+
+		sfn Request_VHAL(ro Owner ObjectRequesting, ValuePreference  PerferredPrimitive) -> ptr<AValue_HAL>
+		{
+			return globalInstance.Request_VHAL(ObjectRequesting, PerferredPrimitive);
+		}
+
+		sfn Request_VHAL(ro Owner ObjectRequesting, ro ptr<ro AValue_HAL     > ValueDesired) -> ptr<AValue_HAL>
+		{
+			return globalInstance.Request_VHAL(ObjectRequesting, ValueDesired);
+		}
+
+		implem sfn Str(void) ro -> string
+		{
+			return globalInstance.Str();
+		}
+
+		sfn TransferOwner(ro Owner ObjectToDisown, ro Owner NewOwner) -> ptr<AValue_HAL>
+		{
+			return globalInstance.TransferOwner(ObjectToDisown, NewOwner);
+		}
+
+	private:
+		Ref(ValueManager) globalInstance;
+	};
 }
 
 Context_End
 
 
 
-#ifdef __Use_Static_ValueHAL_Manager__
+#ifdef __Use_GLOBAL_ValueHAL_Manager__
 
 	Context(NotationEngine::Utility::Value)
 
 	SSource
 	{
 		eGlobal data<ValueManager> VHAL_Mngr;   // Value Manager global instance.
+
+		// Global Value Manager Proxy. To be used when value class holders are implemented using policy design.
+		class GVM_Prox 
+		{
+		public:
+			GVM_Prox()
+			{}
+
+			unbound sfn Zero(ro Owner ObjectRequesting, ValuePreference PerferredPrimitive) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.Zero(ObjectRequesting, PerferredPrimitive);
+			}
+
+			unbound sfn One (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.One(ObjectRequesting, PerferredPrimitive);
+			}
+
+			unbound sfn I64 (ro Owner ObjectRequesting, ValuePreference PerferredPrimitive, uInt64 I64ToAssign) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.I64(ObjectRequesting, PerferredPrimitive, I64ToAssign);
+			}
+
+			//sfn ChangeOwner(ro ptr<Object> ObjectToChangeOwner)
+
+			unbound sfn ClearPool(void) -> void
+			{
+				VHAL_Mngr.ClearPool();
+			}
+
+			unbound sfn Disown(ro ptr<Object> ObjectToDelistValue) -> void
+			{
+				VHAL_Mngr.Disown(ObjectToDelistValue);
+			}
+
+			unbound sfn Request_VHAL(ro Owner ObjectRequesting, ValuePreference  PerferredPrimitive) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.Request_VHAL(ObjectRequesting, PerferredPrimitive);
+			}
+
+			unbound sfn Request_VHAL(ro Owner ObjectRequesting, ro ptr<ro AValue_HAL     > ValueDesired) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.Request_VHAL(ObjectRequesting, ValueDesired);
+			}
+
+			unbound sfn Str(void) -> string
+			{
+				return VHAL_Mngr.Str();
+			}
+
+			unbound sfn TransferOwner(ro Owner ObjectToDisown, ro Owner NewOwner) -> ptr<AValue_HAL>
+			{
+				return VHAL_Mngr.TransferOwner(ObjectToDisown, NewOwner);
+			}
+		};
 	}
 
 	Context_End

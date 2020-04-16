@@ -26,6 +26,14 @@ Context(NotationEngine::Utility::Reflection)
 
 SAlias
 {
+	using TypeHash = std::size_t;
+
+	template<typename Type>
+	using IsSignedType = std::is_signed<Type>;
+
+	template<typename Type>
+	using IsUnsignedType = std::is_unsigned<Type>;
+
 	template<typename Type>
 	using RemoveCV = std::remove_cv_t<Type>;
 
@@ -47,10 +55,13 @@ SAlias
 	using TypeData = std::type_info;
 
 	template<bool Constraint>
-	using Should = typename std::enable_if<Constraint>::type;
+	using ShouldBe = typename std::enable_if<Constraint>::type;
 
 	template<bool Constraint, typename ReturnType>
 	using Where = typename std::enable_if<Constraint, ReturnType>::type;
+
+	template<bool Constraint, typename ReturnTypeA, typename ReturnTypeB>
+	using Choose = typename std::conditional<Constraint, ReturnTypeA, ReturnTypeB>::type;
 }
 
 SMeta
@@ -60,6 +71,18 @@ SMeta
 
 SSource
 {
+	template<typename Type>
+	constant sfn IsSigned(void) -> bool
+	{
+		return IsSignedType<Type>::value;
+	}
+
+	template<typename Type>
+	constant sfn IsUnsigned(void) -> bool
+	{
+		return IsUnsignedType<Type>::value;
+	}
+
 	template<typename Base, typename Derived>
 	constant sfn IsOfClass(void) -> bool
 	{
